@@ -1,0 +1,137 @@
+@use '../base';
+
+.header {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1001;
+  padding: 26px 0;
+  width: 100%;
+  transform: translateY(-150%);
+  will-change: transform;
+  transition: 0.4s transform ease;
+
+  &.sticky {
+    transform: translateY(0);
+  }
+
+  &.blur {
+    background-color: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+  }
+
+  &__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  .logotype-box {
+    display: flex;
+    align-items: center;
+    flex: 2;
+    font-size: 1.5rem;
+    background: linear-gradient(130deg, #22d3ee, #3b82f6, #7c3aed);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+    line-height: 1.35;
+    transition: 0.15s opacity ease;
+
+    &:hover {
+      opacity: 0.75;
+    }
+
+    .logotype-dot {
+      color: #ffffff;
+    }
+  }
+
+  .site-navigation {
+    flex: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .site-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    width: 100%;
+
+    &__item {
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+
+      &:not(:last-child) {
+        @include base.underline-reveal(#ffffff, 1px, 0.25em);
+      }
+
+      &:last-child {
+        margin-left: auto;
+      }
+    }
+  }
+
+  &__hamburger {
+    position: relative;
+    display: none;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+
+    i {
+      position: absolute;
+      width: 20px;
+      height: 1px;
+      background-color: #ffffff;
+      transition: 0.3s opacity ease, 0.3s transform ease;
+    }
+
+    i:first-child {
+      transform: translateY(-4px);
+    }
+
+    i:last-child {
+      transform: translateY(4px);
+    }
+
+    &.active {
+      i:first-child {
+        transform: rotate(45deg);
+      }
+
+      i:nth-child(2) {
+        opacity: 0;
+      }
+
+      i:last-child {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .header {
+    .site-navigation {
+      display: none;
+    }
+
+    &__hamburger {
+      display: flex;
+    }
+  }
+}

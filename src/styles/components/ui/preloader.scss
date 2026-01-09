@@ -1,0 +1,57 @@
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0b0b0b;
+  transition: 0.8s opacity ease, 0.8s visibility ease;
+
+  &__inner {
+    text-align: center;
+    width: 220px;
+  }
+
+  &.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  @keyframes logoFade {
+    to {
+      opacity: 1;
+    }
+  }
+
+  &__logo {
+    margin-bottom: 20px;
+    opacity: 0;
+    font-size: 20px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan-color);
+    animation: logoFade 1.2s ease forwards;
+  }
+
+  &__bar {
+    overflow: hidden;
+    height: 2px;
+    background-color: rgba(255,255,255,0.15);
+
+    @keyframes loading {
+      to {
+        width: 100%;
+      }
+    }
+
+    span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--purple-color), var(--cyan-color));
+      animation: loading 2.2s ease forwards;
+    }
+  }
+}

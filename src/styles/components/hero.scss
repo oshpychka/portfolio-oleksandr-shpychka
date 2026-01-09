@@ -1,0 +1,226 @@
+.hero {
+  position: relative;
+  padding: calc(var(--header-height) + 50px) 0 100px;
+  height: 100dvh;
+  overflow: hidden;
+
+  @keyframes pulseGlow {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+
+    50% {
+      transform: scale(1.15);
+      opacity: 1;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -15%;
+    bottom: -50%;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(6, 182, 212, 0.45), rgba(6, 182, 212, 0.25) 40%, rgba(6, 182, 212, 0.1) 60%, transparent 70%);
+    animation: pulseGlow 6s ease-in-out infinite;
+    filter: blur(100px);
+    pointer-events: none;
+  }
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  &__heading {
+    text-align: center;
+    font-size: 5rem;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  &__text {
+    font-weight: 300;
+    line-height: 1.5;
+    text-align: center;
+    max-width: 850px;
+  }
+
+  &__buttons {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  &__btn {
+    &:first-child {
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+    }
+
+    &:last-child {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 1.5rem;
+      border: 1px solid var(--cyan-color);
+      color: var(--cyan-color);
+      text-decoration: none;
+      background: transparent;
+      transition: 0.3s border-color ease;
+
+      div {
+        display: flex;
+        overflow: hidden;
+        text-shadow: 0 1rem 0 var(--cyan-color);
+      }
+
+      span {
+        display: block;
+        backface-visibility: hidden;
+        color: var(--cyan-color);
+        transform: translateY(var(--m, 0));
+        transition: transform 0.3s ease, color 0.3s ease;
+
+        $i: 1;
+        @while $i <= 12 {
+          &:nth-child(#{$i}) {
+            transition-delay: ($i * 0.04s);
+          }
+          $i: $i + 1;
+        }
+      }
+
+      &:hover,
+      &.is-hovered {
+        border-color: #ffffff;
+
+        div {
+          text-shadow: 0 1rem 0 #ffffff;
+        }
+
+        &::before {
+          clip-path: inset(0 0 0 0);
+        }
+
+        span {
+          --m: -1rem;
+        }
+      }
+    }
+  }
+
+  &__socials {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    gap: 1.5em;
+    width: 100%;
+
+    a {
+      display: flex;
+      align-content: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 2.5rem;
+      padding: 8px;
+      height: 100%;
+      border-radius: 0.5rem;
+      transition: 0.3s background-color ease;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        transition: 0.3s stroke ease;
+
+        &:hover {
+          stroke: var(--cyan-color);
+        }
+      }
+    }
+  }
+
+  @keyframes jump {
+    0% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-8px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fillPulse {
+    0% {
+      fill: transparent;
+    }
+    35% {
+      fill: var(--cyan-color);
+    }
+    60% {
+      fill: transparent;
+    }
+    100% {
+      fill: transparent;
+    }
+  }
+
+  .jump-icon__fill {
+    animation: fillPulse 1.6s ease-in-out infinite;
+  }
+
+  &__mouse {
+    display: inline-block;
+    animation: jump 1.6s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  &__mouse {
+    path:nth-child(3) {
+      animation: fillPulse 1.6s ease-in-out infinite;
+    }
+  }
+}
+
+@media screen and (max-width: 767.9px) {
+  .hero {
+
+    &__heading {
+      font-size: 3.5rem;
+      line-height: 1.2;
+    }
+  }
+}
+
+@media screen and (max-width: 574.9px) {
+  .hero {
+    &__heading {
+      font-size: 2.5rem;
+    }
+
+    &__buttons {
+      flex-direction: column;
+    }
+  }
+}

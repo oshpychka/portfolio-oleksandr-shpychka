@@ -1,0 +1,24 @@
+@mixin underline-reveal($color: currentColor,$height: 2px,$offset: 0.25em) {
+  position: relative;
+  text-decoration: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -#{$offset};
+    width: 100%;
+    height: $height;
+
+    background-color: $color;
+
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: 0.3s transform ease;
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}

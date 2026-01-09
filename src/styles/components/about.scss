@@ -1,0 +1,231 @@
+.about {
+  margin-top: 2rem;
+  padding: 100px 0;
+  min-height: 100dvh;
+  background-color: rgba(10, 15, 26, 0.1);
+  backdrop-filter: blur(100px);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4rem;
+    width: 100%;
+  }
+
+  @keyframes neonPulse {
+    0% {
+      opacity: 0.6;
+      filter: blur(50px);
+    }
+    50% {
+      opacity: 1;
+      filter: blur(60px);
+    }
+    100% {
+      opacity: 0.6;
+      filter: blur(50px);
+    }
+  }
+
+  &__image-box {
+    position: relative;
+    border-radius: 32px;
+    padding: 2px;
+    isolation: isolate;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 30px;
+      border-radius: inherit;
+
+      background: radial-gradient(
+                      circle at top left,
+                      var(--cyan-color),
+                      transparent 60%
+      ),
+      radial-gradient(
+                      circle at bottom right,
+                      var(--purple-color),
+                      transparent 60%
+      ),
+      radial-gradient(
+                      circle at top right,
+                      var(--blue-color),
+                      transparent 60%
+      );
+
+      filter: blur(50px);
+      opacity: 0.85;
+      z-index: -1;
+
+      animation: neonPulse 5s ease-in-out infinite;
+    }
+  }
+
+  &__image {
+    position: relative;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    border-radius: 1.75rem;
+
+    &:after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+
+      background: radial-gradient(
+                      ellipse at center,
+                      rgba(0, 0, 0, 0) 25%,
+                      rgba(0, 0, 0, 0.85) 70%,
+                      rgba(0, 0, 0, 0.95) 100%
+      );
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+    }
+  }
+
+  &__text-box {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    max-width: 700px;
+    height: 100%;
+  }
+
+  &__tag {
+    max-width: 120px;
+  }
+
+  &__heading {
+    margin-top: 1.5rem;
+    max-width: 80%;
+    line-height: 1.2;
+  }
+
+  &__text {
+    margin-top: 1.5rem;
+  }
+
+  &__advantages {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  &__advantage {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    &-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      width: 100%;
+      max-width: 2.5rem;
+      border-radius: 0.5rem;
+
+      img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+    }
+
+    &-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    &-title {
+      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: 300;
+    }
+
+    &-text {
+      color: #98a1b0;
+    }
+
+    &:nth-child(1) {
+      .about__advantage-icon {
+        background-color: rgba(6, 182, 212, 0.15);
+        border: 1px solid rgba(6, 182, 212, 0.5);
+      }
+    }
+
+    &:nth-child(2) {
+      .about__advantage-icon {
+        background-color: rgba(121, 65, 239, 0.15);
+        border: 1px solid rgba(121, 65, 239, 0.5);
+      }
+    }
+
+    &:nth-child(3) {
+      .about__advantage-icon {
+        background-color: rgba(41, 164, 255, 0.15);
+        border: 1px solid rgba(41, 164, 255, 0.5);
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 1199.9px) {
+  .about {
+    &__inner {
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    &__text-box {
+      align-items: center;
+    }
+
+    &__heading,
+    &__text {
+      text-align: center;
+    }
+  }
+}
+
+@media screen and (max-width: 995.9px) {
+  .about {
+    padding: 75px 0;
+  }
+}
+
+@media screen and (max-width: 474.9px) {
+  .about {
+    &__advantage {
+      &-box {
+        gap: 0.5rem;
+      }
+
+      &-title {
+        font-size: 1rem;
+      }
+
+      &-advantage-text {
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
