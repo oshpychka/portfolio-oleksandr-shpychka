@@ -84,6 +84,18 @@ const blocks = Array.from({ length: 16 });
     transition: background-color 0.8s linear;
   }
 
+  .boot.is-leaving {
+    pointer-events: none;
+  }
+
+  .boot__veil {
+    --curve: 0%;
+    border-bottom-left-radius: 50% var(--curve);
+    border-bottom-right-radius: 50% var(--curve);
+    height: 112%;
+    inset: 0 0 auto;
+  }
+
   .boot.is-ready .boot__veil {
     background-color: rgba(0, 0, 0, 0.5);
   }

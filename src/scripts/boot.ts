@@ -123,24 +123,19 @@ export function initBoot() {
     }
     removeIntentListeners();
     inertTargets.forEach((el) => el.removeAttribute('inert'));
-    const done = () => {
-      boot.remove();
-      finish();
-    };
+    boot.classList.add('is-leaving');
+    finish();
+    const remove = () => boot.remove();
     if (reduce) {
-      gsap.to(boot, { autoAlpha: 0, duration: 0.25, onComplete: done });
+      gsap.to(boot, { autoAlpha: 0, duration: 0.25, onComplete: remove });
       return;
     }
     gsap
-      .timeline({ onComplete: done })
-      .to(panel, { yPercent: -6, autoAlpha: 0, duration: 0.55, ease: 'power3.in' })
-      .to(veil, { autoAlpha: 0, duration: 0.7, ease: 'power2.out' }, '-=0.2');
-    window.setTimeout(() => {
-      if (!entered) {
-        boot.remove();
-        finish();
-      }
-    }, 2000);
+      .timeline({ onComplete: remove })
+      .to(panel, { scale: 0.94, autoAlpha: 0, duration: 0.32, ease: 'power2.in' }, 0)
+      .to(veil, { yPercent: -112, duration: 0.85, ease: 'expo.inOut' }, 0.08)
+      .fromTo(veil, { '--curve': '0%' }, { '--curve': '100%', duration: 0.5, ease: 'power2.out' }, 0.08);
+    window.setTimeout(remove, 2000);
   };
 
   const showEntry = () => {
@@ -161,8 +156,7 @@ export function initBoot() {
       return;
     }
     ready = true;
-    const pref = readPref();
-    if (mutedIntent || short || pref !== null) leave(false);
+    if (mutedIntent || short) leave(false);
     else showEntry();
   }
 

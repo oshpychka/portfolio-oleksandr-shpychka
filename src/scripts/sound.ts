@@ -2,14 +2,12 @@ type Group = 'ambient' | 'ui' | 'fx';
 type Pref = 'on' | 'off' | null;
 
 const KEY = 'os-sound';
-const LEVELS: Record<Group, number> = { ambient: 0.05, ui: 0.11, fx: 0.16 };
+const LEVELS: Record<Group, number> = { ambient: 0.22, ui: 0.11, fx: 0.16 };
 const MASTER = 0.9;
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let groups: Record<Group, GainNode> | null = null;
-let ambientNodes: AudioScheduledSourceNode[] = [];
-let ambientOut: GainNode | null = null;
 let noiseBuffer: AudioBuffer | null = null;
 let enabled = false;
 let lastTick = 0;
@@ -65,65 +63,137 @@ function fadeMaster(to: number, time = 0.6) {
   master.gain.linearRampToValueAtTime(to, now + time);
 }
 
-function startAmbient() {
-  if (!ctx || !groups || ambientNodes.length) return;
-  const now = ctx.currentTime;
-  ambientOut = ctx.createGain();
-  ambientOut.gain.setValueAtTime(0, now);
-  ambientOut.gain.linearRampToValueAtTime(1, now + 4);
+const CHORDS = [
+  [110, 164.81, 196, 246.94, 261.63],
+  [87.31, 130.81, 164.81, 220, 261.63],
+  [130.81, 196, 246.94, 293.66, 329.63],
+  [98, 146.83, 220, 246.94, 293.66],
+];
+const BELLS = [440, 523.25, 587.33, 659.25, 783.99, 880];
+const CHORD_LEN = 8;
+const LOOKAHEAD = 2.5;
 
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 520;
-  filter.Q.value = 0.6;
-  ambientOut.connect(filter).connect(groups.ambient);
+type Music = { timer: number; nextChord: number; nextBell: number; chord: number; bus: GainNode; delay: DelayNode; voices: Array<{ osc: OscillatorNode[]; gain: GainNode }> };
+let music: Music | null = null;
 
-  const lfo = ctx.createOscillator();
-  const lfoGain = ctx.createGain();
-  lfo.frequency.value = 0.06;
-  lfoGain.gain.value = 220;
-  lfo.connect(lfoGain).connect(filter.frequency);
-  lfo.start(now);
-  ambientNodes.push(lfo);
+function scheduleChord(at: number, freqs: number[]) {
+  if (!ctx || !music) return;
+  const m = music;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.linearRampToValueAtTime(1, at + 3);
+  gain.gain.setValueAtTime(1, at + CHORD_LEN);
+  gain.gain.linearRampToValueAtTime(0.0001, at + CHORD_LEN + 3.5);
+  gain.connect(m.bus);
+  const osc: OscillatorNode[] = [];
+  freqs.forEach((f, i) => {
+    [
+      [f, 'triangle', -6, i === 0 ? 0.32 : 0.16],
+      [f, 'sine', 7, i === 0 ? 0.3 : 0.14],
+      [f * 2, 'sine', 3, 0.035],
+    ].forEach(([freq, type, detune, level]) => {
+      const o = ctx!.createOscillator();
+      const g = ctx!.createGain();
+      o.type = type as OscillatorType;
+      o.frequency.value = freq as number;
+      o.detune.value = detune as number;
+      g.gain.value = level as number;
+      o.connect(g).connect(gain);
+      o.start(at);
+      o.stop(at + CHORD_LEN + 4);
+      osc.push(o);
+    });
+  });
+  m.voices.push({ osc, gain });
+  osc[0].onended = () => {
+    gain.disconnect();
+    m.voices = m.voices.filter((v) => v.gain !== gain);
+  };
+}
 
-  const breath = ctx.createOscillator();
-  const breathGain = ctx.createGain();
-  breath.frequency.value = 0.11;
-  breathGain.gain.value = 0.25;
-  breath.connect(breathGain).connect(ambientOut.gain);
-  breath.start(now);
-  ambientNodes.push(breath);
-
+function scheduleBell(at: number) {
+  if (!ctx || !music) return;
+  const m = music;
+  const f = BELLS[Math.floor(Math.random() * BELLS.length)];
   [
-    [110, 'triangle', 0],
-    [164.81, 'sine', 4],
-    [220, 'sine', -5],
-    [246.94, 'triangle', 6],
-    [329.63, 'sine', -3],
-  ].forEach(([freq, type, detune]) => {
-    const osc = ctx!.createOscillator();
+    [f, 'sine', 0.22, 2.6],
+    [f * 2.01, 'sine', 0.05, 1.2],
+    [f * 3, 'triangle', 0.015, 0.6],
+  ].forEach(([freq, type, level, dur]) => {
+    const o = ctx!.createOscillator();
     const g = ctx!.createGain();
-    osc.type = type as OscillatorType;
-    osc.frequency.value = freq as number;
-    osc.detune.value = detune as number;
-    g.gain.value = (freq as number) < 150 ? 0.5 : 0.22;
-    osc.connect(g).connect(ambientOut!);
-    osc.start(now);
-    ambientNodes.push(osc);
+    o.type = type as OscillatorType;
+    o.frequency.value = freq as number;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(level as number, at + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + (dur as number));
+    o.connect(g);
+    g.connect(m.bus);
+    g.connect(m.delay);
+    o.start(at);
+    o.stop(at + (dur as number) + 0.05);
   });
 }
 
-function stopAmbient() {
-  if (!ctx || !ambientOut) return;
-  const nodes = ambientNodes;
-  const out = ambientOut;
+function pump() {
+  if (!ctx || !music) return;
+  const horizon = ctx.currentTime + LOOKAHEAD;
+  while (music.nextChord < horizon) {
+    scheduleChord(music.nextChord, CHORDS[music.chord % CHORDS.length]);
+    music.chord += 1;
+    music.nextChord += CHORD_LEN;
+  }
+  while (music.nextBell < horizon) {
+    scheduleBell(music.nextBell);
+    music.nextBell += 1.6 + Math.random() * 3.2;
+  }
+  music.timer = window.setTimeout(pump, 1000);
+}
+
+function startAmbient() {
+  if (!ctx || !groups || music) return;
   const now = ctx.currentTime;
-  out.gain.cancelScheduledValues(now);
-  out.gain.setValueAtTime(out.gain.value, now);
-  out.gain.linearRampToValueAtTime(0, now + 0.8);
-  nodes.forEach((n) => n.stop(now + 0.9));
-  ambientNodes = [];
-  ambientOut = null;
+  const bus = ctx.createGain();
+  bus.gain.setValueAtTime(0.0001, now);
+  bus.gain.linearRampToValueAtTime(1, now + 3);
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 1400;
+  filter.Q.value = 0.4;
+  const delay = ctx.createDelay(1);
+  delay.delayTime.value = 0.38;
+  const feedback = ctx.createGain();
+  feedback.gain.value = 0.38;
+  const wet = ctx.createGain();
+  wet.gain.value = 0.35;
+  delay.connect(feedback).connect(delay);
+  delay.connect(wet).connect(filter);
+  bus.connect(filter).connect(groups.ambient);
+  music = { timer: 0, nextChord: now + 0.05, nextBell: now + 2.5, chord: 0, bus, delay, voices: [] };
+  pump();
+}
+
+function stopAmbient() {
+  if (!ctx || !music) return;
+  const m = music;
+  music = null;
+  window.clearTimeout(m.timer);
+  const now = ctx.currentTime;
+  m.bus.gain.cancelScheduledValues(now);
+  m.bus.gain.setValueAtTime(m.bus.gain.value, now);
+  m.bus.gain.linearRampToValueAtTime(0.0001, now + 0.8);
+  m.voices.forEach((v) => v.osc.forEach((o) => o.stop(now + 0.9)));
+  window.setTimeout(() => m.bus.disconnect(), 1200);
+}
+
+function pauseMusic(paused: boolean) {
+  if (!music || !ctx) return;
+  window.clearTimeout(music.timer);
+  if (!paused) {
+    music.nextChord = Math.max(music.nextChord, ctx.currentTime + 0.1);
+    music.nextBell = Math.max(music.nextBell, ctx.currentTime + 1);
+    pump();
+  }
 }
 
 function tone(group: Group, opts: { freq: number; to?: number; type?: OscillatorType; dur: number; gain: number; attack?: number; delay?: number }) {
@@ -240,10 +310,13 @@ export function initSoundGlobal() {
   wired = true;
   document.addEventListener('visibilitychange', () => {
     if (!ctx || !enabled) return;
-    if (document.hidden) fadeMaster(0, 0.4);
-    else {
+    if (document.hidden) {
+      fadeMaster(0, 0.4);
+      pauseMusic(true);
+    } else {
       ctx.resume();
       fadeMaster(MASTER, 0.8);
+      pauseMusic(false);
     }
   });
 }

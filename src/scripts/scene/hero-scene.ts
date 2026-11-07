@@ -128,6 +128,7 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
   const bodies: Body[] = [];
   let viewW = 1;
   let viewH = 1;
+  let ceiling = Infinity;
 
   const worldAt = (nx: number, ny: number, z = 0) => {
     const dist = camera.position.z - z;
@@ -154,6 +155,13 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
     };
     const unit = (2 * Math.tan((camera.fov * Math.PI) / 360) * camera.position.z) / viewH;
     const moduleScale = (isDesktop ? 54 : 36) * unit;
+    const marginX = (moduleScale * 1.1) / (unit * viewW);
+    const marginY = (moduleScale * 1.1) / (unit * viewH);
+    area.x0 += marginX;
+    area.x1 = Math.max(area.x0, area.x1 - marginX);
+    area.y0 += marginY;
+    area.y1 = Math.max(area.y0, area.y1 - marginY);
+    ceiling = worldAt(0, (a.top - rect.top) / viewH).y;
     const r2 = seeded(11);
     const placed: Vector3[] = [];
     for (let i = 0; i < count; i++) {
@@ -263,6 +271,9 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
           b.spin.addScaledVector(axis, f * dt * 0.6);
         }
       }
+
+      const over = b.pos.y + b.radius - ceiling;
+      if (over > 0) b.vel.y -= over * 60 * dt;
 
       b.pos.addScaledVector(b.vel, dt);
       b.spin.multiplyScalar(Math.exp(-1.4 * dt));
