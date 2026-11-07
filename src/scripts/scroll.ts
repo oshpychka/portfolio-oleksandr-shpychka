@@ -37,8 +37,8 @@ export function initScroll() {
       history.pushState(null, '', url.hash === '#top' ? url.pathname : url.hash);
     }
   };
-  document.addEventListener('click', onClick);
-  cleanups.push(() => document.removeEventListener('click', onClick));
+  window.addEventListener('click', onClick, true);
+  cleanups.push(() => window.removeEventListener('click', onClick, true));
 
   const mm = gsap.matchMedia();
   mm.add(MOTION, () => {

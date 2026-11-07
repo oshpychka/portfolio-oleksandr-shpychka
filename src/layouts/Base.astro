@@ -7,6 +7,8 @@ import '../styles/global.css';
 import Seo from '../components/Seo.astro';
 import Header from '../components/Header.astro';
 import Boot from '../components/Boot.astro';
+import Curtain from '../components/Curtain.astro';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -21,7 +23,7 @@ const props = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js" transition:animate="none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -44,6 +46,7 @@ const props = Astro.props;
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="preload" href={geistLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={geistMonoLatin} as="font" type="font/woff2" crossorigin />
+    <ClientRouter fallback="none" />
     <slot name="head" />
   </head>
   <body class="theme-dark">
@@ -54,9 +57,10 @@ const props = Astro.props;
       <slot />
     </main>
     <slot name="after" />
+    <Curtain />
     <script>
-      import { mount } from '../scripts/app';
-      mount();
+      import { initTransitions } from '../scripts/transitions';
+      initTransitions();
     </script>
   </body>
 </html>

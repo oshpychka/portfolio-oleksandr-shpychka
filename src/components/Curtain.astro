@@ -1,0 +1,47 @@
+---
+import { logoMark } from '../data/logo';
+---
+
+<div class="curtain" transition:persist="page-curtain" aria-hidden="true">
+  <div class="curtain__panel theme-indigo" data-curtain-panel>
+    <svg class="curtain__mark" viewBox={logoMark.viewBox} fill="none">
+      <path d={logoMark.d} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+    </svg>
+    <p class="curtain__label mono mono-s" data-curtain-label></p>
+  </div>
+</div>
+
+<style>
+  .curtain {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-loader) - 1);
+    pointer-events: none;
+  }
+
+  .curtain__panel {
+    --top: 100%;
+    --bottom: 0%;
+    position: absolute;
+    inset: -6% 0;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 20px;
+    visibility: hidden;
+    color: var(--c-cream);
+    border-top-left-radius: 50% var(--top);
+    border-top-right-radius: 50% var(--top);
+    border-bottom-left-radius: 50% var(--bottom);
+    border-bottom-right-radius: 50% var(--bottom);
+    pointer-events: auto;
+  }
+
+  .curtain__mark {
+    width: 72px;
+  }
+
+  .curtain__label {
+    color: var(--c-muted-dark);
+  }
+</style>

@@ -112,3 +112,54 @@ main article > section > .container {
 main {
   overflow-x: clip;
 }
+
+.preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: clamp(280px, 26vw, 420px);
+  aspect-ratio: 8 / 5;
+  translate: -50% -50%;
+  pointer-events: none;
+  transform: scale(0);
+  will-change: transform;
+}
+
+.preview__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.preview__canvas,
+.preview__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.preview--gl .preview__img {
+  display: none;
+}
+
+.preview:not(.preview--gl) .preview__canvas {
+  display: none;
+}
+
+.preview__view {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  margin: -46px 0 0 -46px;
+  border-radius: 50%;
+  background: var(--c-blue);
+  color: var(--c-ink);
+}

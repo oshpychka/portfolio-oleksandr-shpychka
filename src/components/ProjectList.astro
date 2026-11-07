@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import type { Project } from '../lib/projects';
 
 interface Props {
@@ -7,12 +7,13 @@ interface Props {
   headingLevel?: 'h3' | 'h2';
 }
 const { projects, headingLevel: Heading = 'h3' } = Astro.props;
+const previews = await Promise.all(projects.map((p) => getImage({ src: p.cover, width: 960, format: 'webp' })));
 ---
 
-<ul role="list" class="plist">
-  {projects.map((p) => (
+<ul role="list" class="plist" data-preview-list>
+  {projects.map((p, i) => (
     <li class="plist__item" data-type={p.type}>
-      <a class="prow" href={`/work/${p.slug}`}>
+      <a class="prow" href={`/work/${p.slug}`} data-preview={previews[i].src}>
         <span class="prow__media">
           <Image src={p.cover} alt="" widths={[480, 720, 960]} sizes="(min-width: 640px) 50vw, 100vw" loading="lazy" />
         </span>

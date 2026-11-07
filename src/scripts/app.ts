@@ -11,6 +11,7 @@ import { initClocks } from './clock';
 import { initBoot, whenEntered } from './boot';
 import { initSoundUI } from './sound-ui';
 import { initHero } from './hero';
+import { initPreview } from './preview';
 
 type Cleanup = () => void;
 
@@ -31,6 +32,7 @@ export function mount() {
     initCurves(),
     initParallax(),
     initHero(),
+    initPreview(),
   ];
   const fonts = document.fonts?.ready ?? Promise.resolve();
   Promise.all([fonts, whenEntered()]).then(() => {

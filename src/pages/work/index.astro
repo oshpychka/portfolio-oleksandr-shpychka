@@ -141,6 +141,16 @@ const byYear = [...allProjects].sort((a, b) => Number(b.year) - Number(a.year) |
     object-fit: cover;
   }
 
+  @media (hover: hover) and (pointer: fine) {
+    .card__media :global(img) {
+      transition: transform 0.9s var(--ease-out);
+    }
+
+    .card__link:hover .card__media :global(img) {
+      transform: scale(1.04);
+    }
+  }
+
   .card__row {
     display: flex;
     justify-content: space-between;
