@@ -55,10 +55,41 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
 
 <style>
   .site-header {
+    --h-fg: var(--c-cream);
+    --h-bg: var(--c-black);
+    --h-rule: var(--c-line-dark);
     position: absolute;
     inset: 0 0 auto;
     z-index: var(--z-header);
-    color: var(--c-cream);
+    color: var(--h-fg);
+  }
+
+  .site-header[data-tone='cream'] {
+    --h-fg: var(--c-ink);
+    --h-bg: var(--c-cream);
+    --h-rule: var(--c-line-light);
+  }
+
+  :global(.js) .site-header {
+    position: fixed;
+    transition:
+      transform 0.5s var(--ease-out),
+      background-color 0.3s linear,
+      color 0.3s linear,
+      box-shadow 0.3s linear;
+  }
+
+  :global(.js.scrolled) .site-header {
+    background: var(--h-bg);
+    box-shadow: 0 1px 0 var(--h-rule);
+  }
+
+  :global(.js.header-hidden) .site-header {
+    transform: translateY(-100%);
+  }
+
+  :global(.js) .site-header__bar {
+    min-height: 72px;
   }
 
   .site-header__bar {
@@ -99,7 +130,7 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
     gap: 10px;
     padding: 0 18px;
     min-height: 40px;
-    border: 1px solid var(--c-line-dark);
+    border: 1px solid var(--h-rule);
     border-radius: var(--radius-pill);
     white-space: nowrap;
   }
@@ -117,6 +148,35 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
 
   .menu-toggle {
     display: none;
+  }
+
+  :global(.js) .menu-toggle {
+    position: fixed;
+    top: 16px;
+    right: var(--gutter);
+    z-index: var(--z-menu);
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--c-indigo);
+    color: var(--c-cream);
+    border: 1px solid var(--c-line-dark);
+    transform: scale(0);
+    visibility: hidden;
+    transition:
+      transform 0.45s var(--ease-out),
+      visibility 0s linear 0.45s;
+  }
+
+  :global(.js.header-hidden) .menu-toggle,
+  :global(.js.menu-open) .menu-toggle {
+    transform: scale(1);
+    visibility: visible;
+    transition:
+      transform 0.45s var(--ease-out),
+      visibility 0s;
   }
 
   .site-menu[hidden] {
@@ -141,18 +201,11 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
     }
 
     :global(.js) .menu-toggle {
-      position: fixed;
-      top: 16px;
-      right: var(--gutter);
-      z-index: var(--z-menu);
-      display: grid;
-      place-items: center;
+      top: 8px;
       width: 56px;
       height: 56px;
-      border-radius: 50%;
-      background: var(--c-indigo);
-      color: var(--c-cream);
-      border: 1px solid var(--c-line-dark);
+      transform: scale(1);
+      visibility: visible;
     }
   }
 
@@ -240,7 +293,3 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
   }
 </style>
 
-<script>
-  import { initMenu } from '../scripts/menu';
-  initMenu();
-</script>

@@ -17,7 +17,7 @@ const links = [
     <div class="section-grid">
       <SectionHead index={5} label="Contact" />
       <div class="contact__content">
-        <h2 class="contact__title" id="contact-title">{contact.heading}</h2>
+        <h2 class="contact__title" id="contact-title" data-reveal="lines">{contact.heading}</h2>
         <p class="contact__line">{contact.line}</p>
 
         <div class="contact__mail">
@@ -116,10 +116,3 @@ const links = [
   }
 </style>
 
-<script>
-  import { initCopy } from '../scripts/copy';
-  import { initClocks } from '../scripts/clock';
-  import { SITE } from '../config/site';
-  initCopy();
-  initClocks(SITE.timeZone);
-</script>

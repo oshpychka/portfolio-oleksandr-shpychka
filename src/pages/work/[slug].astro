@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Footer from '../../components/Footer.astro';
+import Curve from '../../components/Curve.astro';
 import { allProjects, getNextProject, type Project } from '../../lib/projects';
 import { SITE } from '../../config/site';
 
@@ -32,7 +33,7 @@ const title = `${project.title} — case study — ${SITE.name}`;
         <p class="mono mono-s muted">
           <a class="link-u" href="/work">Work</a> / Case {String(index).padStart(2, '0')} · {typeLabel}
         </p>
-        <h1 class="case-hero__title">{project.title}</h1>
+        <h1 class="case-hero__title" data-reveal="lines">{project.title}</h1>
         <p class="case-hero__summary">{project.summary}</p>
         <dl class="meta mono">
           <div><dt>Year</dt><dd>{project.year}</dd></div>
@@ -47,11 +48,12 @@ const title = `${project.title} — case study — ${SITE.name}`;
           </div>
         )}
         <figure class="case-cover marks">
-          <div class="frame">
+          <div class="frame" data-parallax="5">
             <Image src={project.cover} alt={`${project.title} cover`} widths={[640, 960, 1280, 1920, 2400]} sizes="(min-width: 1440px) 1392px, calc(100vw - 2 * var(--gutter))" loading="eager" fetchpriority="high" />
           </div>
         </figure>
       </div>
+      <Curve />
     </header>
 
     {blocks.length > 0 && (
@@ -59,12 +61,13 @@ const title = `${project.title} — case study — ${SITE.name}`;
         <div class="container case-text__inner">
           {blocks.map((block, i) => (
             <div class="block">
-              <p class="mono block__label">{String(i + 1).padStart(2, '0')} — {block.title}</p>
+              <p class="mono block__label" aria-hidden="true" data-scramble>{String(i + 1).padStart(2, '0')} — {block.title}</p>
               <h2 class="visually-hidden">{block.title}</h2>
               <p class="block__text">{block.text}</p>
             </div>
           ))}
         </div>
+        <Curve />
       </section>
     )}
 
@@ -72,7 +75,7 @@ const title = `${project.title} — case study — ${SITE.name}`;
       <section class="case-gallery theme-dark" aria-label="Gallery">
         <div class="container case-gallery__inner">
           {project.gallery.map((img, i) => (
-            <figure class="frame frame--auto">
+            <figure class="frame frame--auto" data-parallax="4">
               <Image src={img} alt={`${project.title}, screen ${i + 1}`} widths={[640, 960, 1280, 1920]} sizes="(min-width: 1440px) 1392px, 100vw" loading="lazy" />
             </figure>
           ))}
@@ -85,8 +88,8 @@ const title = `${project.title} — case study — ${SITE.name}`;
     <div class="container next__inner">
       {next && next.slug !== project.slug && (
         <a class="next__link" href={`/work/${next.slug}`}>
-          <span class="mono muted">Next project</span>
-          <span class="next__title">{next.title} →</span>
+          <span class="mono muted" data-scramble>Next project</span>
+          <span class="next__title" data-reveal="lines">{next.title} →</span>
         </a>
       )}
       <a class="mono link-u next__all" href="/work">← All work</a>
@@ -96,6 +99,11 @@ const title = `${project.title} — case study — ${SITE.name}`;
 </Base>
 
 <style>
+  .case-hero,
+  .case-text {
+    position: relative;
+  }
+
   .case-hero__inner {
     display: grid;
     gap: 28px;

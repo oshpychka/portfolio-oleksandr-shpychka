@@ -7,9 +7,9 @@ import { SITE } from '../config/site';
 <Base title={meta.notFound.title} description={meta.notFound.description} noindex>
   <section class="nf theme-dark blueprint-grid" aria-labelledby="nf-title">
     <div class="container nf__inner">
-      <p class="mono mono-s muted">Error 404 · OS v{SITE.version}</p>
+      <p class="mono mono-s muted" data-scramble>Error 404 · OS v{SITE.version}</p>
       <div class="nf__body">
-        <h1 id="nf-title">Blueprint not found</h1>
+        <h1 id="nf-title" data-reveal="lines">Blueprint not found</h1>
         <p class="nf__text">This page fell off the drawing board. Put the modules back in place, or skip the puzzle.</p>
         <a class="btn btn--primary" href="/">Back home</a>
       </div>

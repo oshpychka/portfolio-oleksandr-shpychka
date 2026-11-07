@@ -171,3 +171,51 @@ p {
 html.menu-open {
   overflow: hidden;
 }
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.reveal-pending [data-reveal] {
+  visibility: hidden;
+}
+
+.reveal-line {
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.curve {
+  display: none;
+}
+
+.has-curves .curve {
+  display: block;
+  position: absolute;
+  z-index: 2;
+  top: calc(100% - 1px);
+  left: -10%;
+  width: 120%;
+  height: clamp(56px, 9vw, 150px);
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: var(--bg);
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+[tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}

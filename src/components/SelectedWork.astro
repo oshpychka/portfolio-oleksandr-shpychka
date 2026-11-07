@@ -1,5 +1,6 @@
 ---
 import SectionHead from './SectionHead.astro';
+import Curve from './Curve.astro';
 import ProjectList from './ProjectList.astro';
 import { allProjects, featuredProjects } from '../lib/projects';
 ---
@@ -8,11 +9,12 @@ import { allProjects, featuredProjects } from '../lib/projects';
   <div class="container section-grid">
     <SectionHead index={2} label="Selected work" />
     <div class="work__content">
-      <h2 class="section-title" id="work-title">Selected work</h2>
+      <h2 class="section-title" id="work-title" data-reveal="lines">Selected work</h2>
       <ProjectList projects={featuredProjects} />
       <a class="btn work__all" href="/work">All work <sup>{allProjects.length}</sup></a>
     </div>
   </div>
+  <Curve />
 </section>
 
 <style>

@@ -24,7 +24,15 @@ const props = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script is:inline>document.documentElement.classList.replace('no-js', 'js');</script>
+    <script is:inline>
+      (function (d) {
+        d.classList.replace('no-js', 'js');
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          d.classList.add('reveal-pending');
+          setTimeout(function () { d.classList.remove('reveal-pending'); }, 3000);
+        }
+      })(document.documentElement);
+    </script>
     <Seo {...props} />
     <meta name="theme-color" content="#000000" />
     <meta name="color-scheme" content="dark light" />
@@ -44,5 +52,9 @@ const props = Astro.props;
       <slot />
     </main>
     <slot name="after" />
+    <script>
+      import { mount } from '../scripts/app';
+      mount();
+    </script>
   </body>
 </html>

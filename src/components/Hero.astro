@@ -1,4 +1,5 @@
 ---
+import Curve from './Curve.astro';
 import { hero } from '../data/content';
 import { SITE } from '../config/site';
 import { cvAvailable } from '../lib/cv';
@@ -7,15 +8,12 @@ import { cvAvailable } from '../lib/cv';
 <section class="hero theme-dark blueprint-grid" aria-labelledby="hero-title">
   <div class="container hero__inner">
     <div class="hero__sys mono mono-s muted" aria-hidden="true">
-      <span>// OS v{SITE.version}</span>
-      <span>Status: {SITE.status === 'available' ? 'Available' : 'Busy'}</span>
+      <span data-scramble>// OS v{SITE.version}</span>
+      <span data-scramble>Status: {SITE.status === 'available' ? 'Available' : 'Busy'}</span>
       <span hidden data-clock-wrap>Sys.time <span data-clock></span> {SITE.city}</span>
     </div>
 
-    <h1 class="hero__title" id="hero-title">
-      <span>{SITE.firstName}</span>
-      <span>Shpychka</span>
-    </h1>
+    <h1 class="hero__title" id="hero-title" data-reveal="lines">{SITE.firstName}<br /> Shpychka</h1>
 
     <div class="hero__body">
       <p class="hero__line">{hero.line}</p>
@@ -31,11 +29,12 @@ import { cvAvailable } from '../lib/cv';
     <div class="hero__foot mark-row mono mono-s" aria-hidden="true">
       <span class="plus"></span>
       <span class="plus hide-s"></span>
-      <span>Scroll to explore</span>
+      <span data-scramble>Scroll to explore</span>
       <span class="plus hide-s"></span>
       <span class="plus"></span>
     </div>
   </div>
+  <Curve />
 </section>
 
 <style>
@@ -60,7 +59,6 @@ import { cvAvailable } from '../lib/cv';
 
   .hero__title {
     align-self: end;
-    display: grid;
     font-size: var(--fs-display);
     line-height: 0.86;
     letter-spacing: -0.055em;

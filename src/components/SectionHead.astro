@@ -7,9 +7,9 @@ const { index, label } = Astro.props;
 ---
 
 <div class="section-head mono" aria-hidden="true">
-  <span>{String(index).padStart(2, '0')}</span>
+  <span data-scramble>{String(index).padStart(2, '0')}</span>
   <span class="section-head__rule"></span>
-  <span>{label}</span>
+  <span data-scramble>{label}</span>
 </div>
 
 <style>

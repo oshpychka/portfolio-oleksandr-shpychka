@@ -12,6 +12,7 @@ export function initMenu() {
     toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     menu.hidden = !open;
     document.documentElement.classList.toggle('menu-open', open);
+    document.dispatchEvent(new CustomEvent('menu:change', { detail: { open } }));
     main?.toggleAttribute('inert', open);
     header?.toggleAttribute('inert', open);
     if (open) {

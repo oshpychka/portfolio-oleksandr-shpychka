@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import SectionHead from './SectionHead.astro';
+import Curve from './Curve.astro';
 import { about } from '../data/content';
 import photo from '../assets/about/developer.jpg';
 ---
@@ -9,10 +10,10 @@ import photo from '../assets/about/developer.jpg';
   <div class="container section-grid">
     <SectionHead index={1} label="About" />
     <div class="about__content">
-      <h2 class="about__title" id="about-title">{about.heading}</h2>
+      <h2 class="about__title" id="about-title" data-reveal="lines">{about.heading}</h2>
       <div class="about__cols">
         <figure class="about__photo marks">
-          <div class="frame">
+          <div class="frame" data-parallax="8">
             <Image src={photo} alt={about.photoAlt} widths={[360, 540, 720, 960]} sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" loading="lazy" />
           </div>
         </figure>
@@ -30,6 +31,7 @@ import photo from '../assets/about/developer.jpg';
       </div>
     </div>
   </div>
+  <Curve />
 </section>
 
 <style>

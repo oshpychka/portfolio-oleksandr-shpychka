@@ -1,5 +1,6 @@
 ---
 import SectionHead from './SectionHead.astro';
+import Curve from './Curve.astro';
 import { experience, experienceEnd } from '../data/content';
 ---
 
@@ -7,15 +8,15 @@ import { experience, experienceEnd } from '../data/content';
   <div class="container section-grid">
     <SectionHead index={4} label="Experience" />
     <div class="exp__content">
-      <h2 class="section-title" id="exp-title">Experience</h2>
+      <h2 class="section-title" id="exp-title" data-reveal="lines">Experience</h2>
       <ol role="list" class="exp__list">
         {experience.map((job) => (
           <li class="exp__item" data-node>
             <p class="exp__years mono">
-              <span>{job.from}</span>
+              <span data-scramble>{job.from}</span>
               <span aria-hidden="true">—</span>
               <span class="visually-hidden">to</span>
-              <span>{job.to}</span>
+              <span data-scramble>{job.to}</span>
             </p>
             <div class="exp__body">
               <h3>{job.company}</h3>
@@ -36,6 +37,7 @@ import { experience, experienceEnd } from '../data/content';
       </ol>
     </div>
   </div>
+  <Curve />
 </section>
 
 <style>

@@ -1,5 +1,6 @@
 ---
 import SectionHead from './SectionHead.astro';
+import Curve from './Curve.astro';
 import { stack } from '../data/content';
 ---
 
@@ -7,12 +8,13 @@ import { stack } from '../data/content';
   <div class="container section-grid">
     <SectionHead index={3} label="Stack" />
     <div class="stack__content">
-      <h2 class="section-title" id="stack-title">Stack</h2>
+      <h2 class="section-title" id="stack-title" data-reveal="lines">Stack</h2>
       <ul role="list" class="stack__words" data-physics-area>
         {stack.map((word) => <li class="stack__word" data-physics-body>{word}</li>)}
       </ul>
     </div>
   </div>
+  <Curve />
 </section>
 
 <style>
