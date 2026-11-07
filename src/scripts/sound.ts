@@ -33,6 +33,7 @@ function ensureContext() {
   const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!Ctor) return null;
   ctx = new Ctor();
+  ctx.addEventListener('statechange', () => emit());
   master = ctx.createGain();
   master.gain.value = 0;
   const comp = ctx.createDynamicsCompressor();
@@ -266,7 +267,9 @@ export function play(name: SoundName, arg?: number) {
   (sounds[name] as (a?: number) => void)(arg);
 }
 
-export const isSoundOn = () => enabled;
+const audible = () => enabled && ctx?.state === 'running';
+
+export const isSoundOn = () => audible();
 
 export function onSoundChange(fn: (on: boolean) => void) {
   listeners.add(fn);
@@ -274,14 +277,15 @@ export function onSoundChange(fn: (on: boolean) => void) {
 }
 
 function emit() {
-  document.documentElement.classList.toggle('sound-on', enabled);
-  listeners.forEach((fn) => fn(enabled));
+  const on = audible();
+  document.documentElement.classList.toggle('sound-on', on);
+  listeners.forEach((fn) => fn(on));
 }
 
 export function enableSound(remember = true) {
   const c = ensureContext();
   if (!c) return false;
-  c.resume();
+  c.resume().catch(() => undefined);
   enabled = true;
   if (remember) writePref('on');
   if (!document.hidden) fadeMaster(MASTER, 0.8);
@@ -299,7 +303,7 @@ export function disableSound(remember = true) {
 }
 
 export function toggleSound() {
-  if (enabled) disableSound();
+  if (audible()) disableSound();
   else enableSound();
 }
 
@@ -321,12 +325,21 @@ export function initSoundGlobal() {
   });
 }
 
-export function armSoundOnFirstGesture() {
-  const start = () => {
-    window.removeEventListener('pointerdown', start, true);
-    window.removeEventListener('keydown', start, true);
-    if (readPref() === 'on' && !enabled) enableSound(false);
+const GESTURES = ['pointerdown', 'keydown', 'touchend', 'click'] as const;
+
+function resumeOnGesture() {
+  const resume = () => {
+    if (!ctx || !enabled) return detach();
+    ctx.resume().then(() => {
+      if (ctx?.state === 'running') detach();
+    }, () => undefined);
   };
-  window.addEventListener('pointerdown', start, true);
-  window.addEventListener('keydown', start, true);
+  const detach = () => GESTURES.forEach((type) => window.removeEventListener(type, resume, true));
+  GESTURES.forEach((type) => window.addEventListener(type, resume, true));
+}
+
+export function tryAutoplay() {
+  if (readPref() === 'off' || enabled) return;
+  if (!enableSound(false)) return;
+  if (ctx?.state !== 'running') resumeOnGesture();
 }

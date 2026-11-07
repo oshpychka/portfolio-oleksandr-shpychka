@@ -1,5 +1,5 @@
 import { gsap } from './gsap';
-import { enableSound, readPref, armSoundOnFirstGesture, play } from './sound';
+import { enableSound, disableSound, tryAutoplay, play } from './sound';
 
 type Task = { label: string; weight: number; done: boolean };
 
@@ -76,7 +76,7 @@ export function initBoot() {
   const startedAt = performance.now();
   let ready = false;
   let leaving = false;
-  let mutedIntent = false;
+  let earlyIntent = false;
 
   const render = () => {
     const v = Math.round(shown.value);
@@ -118,8 +118,6 @@ export function initBoot() {
     if (withSound) {
       enableSound();
       play('enter');
-    } else if (readPref() === 'on') {
-      armSoundOnFirstGesture();
     }
     removeIntentListeners();
     inertTargets.forEach((el) => el.removeAttribute('inert'));
@@ -156,7 +154,7 @@ export function initBoot() {
       return;
     }
     ready = true;
-    if (mutedIntent || short) leave(false);
+    if (earlyIntent || short) leave(false);
     else showEntry();
   }
 
@@ -168,7 +166,7 @@ export function initBoot() {
     }
     if (e.type === 'pointerdown' && (e.target as Element).closest('[data-boot-enter], [data-boot-mute]')) return;
     if (ready) leave(false);
-    else mutedIntent = true;
+    else earlyIntent = true;
   };
 
   const intentEvents = ['wheel', 'touchmove', 'keydown', 'pointerdown'] as const;
@@ -176,8 +174,12 @@ export function initBoot() {
   intentEvents.forEach((type) => window.addEventListener(type, onIntent, { capture: true, passive: true }));
 
   enterBtn.addEventListener('click', () => leave(true));
-  muteBtn.addEventListener('click', () => leave(false));
+  muteBtn.addEventListener('click', () => {
+    disableSound();
+    leave(false);
+  });
 
+  tryAutoplay();
   addTask = track;
   track('type', document.fonts?.ready ?? Promise.resolve(), 2);
   const covers = [...document.querySelectorAll<HTMLImageElement>('.prow__media img, .card__media img, .case-cover img')].slice(0, 8);

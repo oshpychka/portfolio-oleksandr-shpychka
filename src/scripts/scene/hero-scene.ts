@@ -5,7 +5,6 @@ import {
   DoubleSide,
   DynamicDrawUsage,
   InstancedMesh,
-  LatheGeometry,
   Matrix4,
   MeshPhysicalMaterial,
   PMREMGenerator,
@@ -15,13 +14,11 @@ import {
   Raycaster,
   SRGBColorSpace,
   Scene,
-  SphereGeometry,
   Vector2,
   Vector3,
   WebGLRenderer,
-  type BufferGeometry,
 } from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { makeParts, PART_MIX } from './parts';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 export interface SceneOptions {
@@ -42,38 +39,9 @@ type Body = {
   spin: Vector3;
   radius: number;
   scale: number;
+  kind: number;
+  slot: number;
 };
-
-function moduleGeometry(): BufferGeometry {
-  const R = 0.3;
-  const r = 0.13;
-  const bevel = 0.025;
-  const from = 0.18;
-  const to = 1;
-  const profile = [
-    new Vector2(r, from),
-    new Vector2(r, to - bevel),
-    new Vector2(r + bevel, to),
-    new Vector2(R - bevel, to),
-    new Vector2(R, to - bevel),
-    new Vector2(R, from),
-  ];
-  const arm = new LatheGeometry(profile, 40);
-  const hub = new SphereGeometry(0.42, 40, 24);
-  const arms = [
-    new Matrix4(),
-    new Matrix4().makeRotationZ(Math.PI),
-    new Matrix4().makeRotationZ(Math.PI / 2),
-    new Matrix4().makeRotationZ(-Math.PI / 2),
-    new Matrix4().makeRotationX(Math.PI / 2),
-    new Matrix4().makeRotationX(-Math.PI / 2),
-  ].map((m) => arm.clone().applyMatrix4(m));
-  const merged = mergeGeometries([hub, ...arms]);
-  arm.dispose();
-  hub.dispose();
-  arms.forEach((g) => g.dispose());
-  return merged!;
-}
 
 function seeded(seed: number) {
   let s = seed;
@@ -111,19 +79,32 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
   const camera = new PerspectiveCamera(28, 1, 0.1, 100);
   camera.position.set(0, 0, 22);
 
-  const geometry = moduleGeometry();
+  const parts = makeParts();
   const material = new MeshPhysicalMaterial({ roughness: 0.26, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, side: DoubleSide });
 
   const desktop = window.matchMedia('(min-width: 861px)').matches;
-  const count = desktop ? 16 : 8;
-  const mesh = new InstancedMesh(geometry, material, count);
-  mesh.instanceMatrix.setUsage(DynamicDrawUsage);
-  scene.add(mesh);
+  const mix = (desktop ? PART_MIX.desktop : PART_MIX.mobile).map((name) => Math.max(0, parts.findIndex((p) => p.name === name)));
+  const count = mix.length;
+  const slots: number[] = [];
+  const perKind = parts.map(() => 0);
+  mix.forEach((kind) => {
+    slots.push(perKind[kind]);
+    perKind[kind] += 1;
+  });
+  const meshes = parts.map((part, kind) => {
+    const m = new InstancedMesh(part.geometry, material, Math.max(1, perKind[kind]));
+    m.count = perKind[kind];
+    m.instanceMatrix.setUsage(DynamicDrawUsage);
+    scene.add(m);
+    return m;
+  });
 
   const rand = seeded(7);
   const color = new Color();
-  for (let i = 0; i < count; i++) mesh.setColorAt(i, color.set(PALETTE[Math.floor(rand() * PALETTE.length)]));
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  mix.forEach((kind, i) => meshes[kind].setColorAt(slots[i], color.set(PALETTE[Math.floor(rand() * PALETTE.length)])));
+  meshes.forEach((m) => {
+    if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  });
 
   const bodies: Body[] = [];
   let viewW = 1;
@@ -154,9 +135,9 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
       y1: (a.bottom - rect.top) / viewH,
     };
     const unit = (2 * Math.tan((camera.fov * Math.PI) / 360) * camera.position.z) / viewH;
-    const moduleScale = (isDesktop ? 54 : 36) * unit;
-    const marginX = (moduleScale * 1.1) / (unit * viewW);
-    const marginY = (moduleScale * 1.1) / (unit * viewH);
+    const moduleScale = (isDesktop ? 58 : 38) * unit;
+    const marginX = (moduleScale * 0.8) / (unit * viewW);
+    const marginY = (moduleScale * 0.8) / (unit * viewH);
     area.x0 += marginX;
     area.x1 = Math.max(area.x0, area.x1 - marginX);
     area.y0 += marginY;
@@ -169,15 +150,16 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
       for (let tries = 0; tries < 40; tries++) {
         const z = (r2() - 0.5) * 3;
         p = worldAt(area.x0 + r2() * (area.x1 - area.x0), area.y0 + r2() * (area.y1 - area.y0), z);
-        if (placed.every((q) => q.distanceTo(p) > moduleScale * 1.55)) break;
+        if (placed.every((q) => Math.hypot(q.x - p.x, q.y - p.y) > moduleScale * 1.9)) break;
       }
       placed.push(p);
       const existing = bodies[i];
       const scale = moduleScale * (0.82 + r2() * 0.36);
+      const partRadius = parts[mix[i]].radius;
       if (existing) {
         existing.rest.copy(p);
         existing.scale = scale;
-        existing.radius = scale * 0.92;
+        existing.radius = scale * partRadius;
       } else {
         const rot = new Quaternion().setFromAxisAngle(new Vector3(r2() - 0.5, r2() - 0.5, r2() - 0.5).normalize(), r2() * Math.PI * 2);
         bodies.push({
@@ -186,8 +168,10 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
           vel: new Vector3(),
           rot,
           spin: new Vector3((r2() - 0.5) * 0.3, (r2() - 0.5) * 0.3, (r2() - 0.5) * 0.3),
-          radius: scale * 0.92,
+          radius: scale * partRadius,
           scale,
+          kind: mix[i],
+          slot: slots[i],
         });
       }
     }
@@ -196,12 +180,12 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
   const matrix = new Matrix4();
   const scaleVec = new Vector3();
   const writeMatrices = () => {
-    bodies.forEach((b, i) => {
+    bodies.forEach((b) => {
       scaleVec.setScalar(b.scale);
       matrix.compose(b.pos, b.rot, scaleVec);
-      mesh.setMatrixAt(i, matrix);
+      meshes[b.kind].setMatrixAt(b.slot, matrix);
     });
-    mesh.instanceMatrix.needsUpdate = true;
+    meshes.forEach((m) => (m.instanceMatrix.needsUpdate = true));
   };
 
   const raycaster = new Raycaster();
@@ -389,12 +373,12 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
       window.removeEventListener('pointerdown', onPointerMove);
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);
       window.removeEventListener('scroll', onScroll);
-      geometry.dispose();
+      parts.forEach((p) => p.geometry.dispose());
       material.dispose();
       envTexture.dispose();
       pmrem.dispose();
       room.dispose?.();
-      mesh.dispose();
+      meshes.forEach((m) => m.dispose());
       renderer.dispose();
       renderer.forceContextLoss();
       canvas.remove();
