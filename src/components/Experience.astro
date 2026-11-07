@@ -1,0 +1,125 @@
+---
+import SectionHead from './SectionHead.astro';
+import { experience, experienceEnd } from '../data/content';
+---
+
+<section class="section exp theme-dark" id="experience" aria-labelledby="exp-title">
+  <div class="container section-grid">
+    <SectionHead index={4} label="Experience" />
+    <div class="exp__content">
+      <h2 class="section-title" id="exp-title">Experience</h2>
+      <ol role="list" class="exp__list">
+        {experience.map((job) => (
+          <li class="exp__item" data-node>
+            <p class="exp__years mono">
+              <span>{job.from}</span>
+              <span aria-hidden="true">—</span>
+              <span class="visually-hidden">to</span>
+              <span>{job.to}</span>
+            </p>
+            <div class="exp__body">
+              <h3>{job.company}</h3>
+              <p class="mono muted">{job.role}</p>
+              {job.text && <p>{job.text}</p>}
+              {job.points && (
+                <ul class="exp__points">
+                  {job.points.map((point) => <li>{point}</li>)}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))}
+        <li class="exp__item exp__item--end" data-node>
+          <p class="exp__years mono">Now</p>
+          <p class="exp__end">{experienceEnd}</p>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .exp__content {
+    display: grid;
+    gap: clamp(40px, 6vw, 72px);
+  }
+
+  .exp__list {
+    --node: 13px;
+    position: relative;
+    display: grid;
+    gap: clamp(48px, 7vw, 96px);
+    padding-left: 40px;
+  }
+
+  .exp__list::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--rule);
+  }
+
+  .exp__item {
+    position: relative;
+    display: grid;
+    gap: 16px;
+  }
+
+  .exp__item::before {
+    content: '';
+    position: absolute;
+    left: -40px;
+    top: 4px;
+    width: var(--node);
+    height: var(--node);
+    border: 1px solid var(--fg);
+    border-radius: 50%;
+    background: var(--bg);
+  }
+
+  .exp__item--end::before {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .exp__years {
+    display: flex;
+    gap: 10px;
+    color: var(--accent);
+  }
+
+  .exp__body {
+    display: grid;
+    gap: 12px;
+    max-width: 62ch;
+  }
+
+  .exp__points {
+    display: grid;
+    gap: 8px;
+    padding-left: 1.1em;
+    color: var(--muted);
+  }
+
+  .exp__points li::marker {
+    content: '+  ';
+    color: var(--fg);
+  }
+
+  .exp__end {
+    font-size: var(--fs-h3);
+    font-weight: 500;
+    letter-spacing: var(--tracking-snug);
+    line-height: 1.1;
+  }
+
+  @media (min-width: 860px) {
+    .exp__item {
+      grid-template-columns: 200px 1fr;
+      gap: 40px;
+    }
+  }
+</style>

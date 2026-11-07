@@ -1,0 +1,246 @@
+---
+import Logo from './Logo.astro';
+import { NAV, SITE } from '../config/site';
+import { cvAvailable } from '../lib/cv';
+
+const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
+---
+
+<header class="site-header">
+  <div class="container site-header__bar">
+    <a class="site-header__logo" href="/" aria-label={`${SITE.name} — home`}>
+      <Logo size={44} />
+    </a>
+    <nav class="site-header__nav" aria-label="Main">
+      <ul role="list">
+        {NAV.map((item) => <li><a class="mono" href={item.href}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+    <p class="site-header__status mono" data-status={SITE.status}>
+      <span class="dot" aria-hidden="true"></span>{statusLabel}
+    </p>
+  </div>
+</header>
+
+<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu" data-menu-toggle>
+  <span class="menu-toggle__lines" aria-hidden="true"><span></span><span></span></span>
+</button>
+
+<div class="site-menu theme-dark blueprint-grid" id="site-menu" hidden data-menu>
+  <div class="container site-menu__inner">
+    <p class="mono muted">// Menu</p>
+    <nav aria-label="Menu">
+      <ol role="list" class="site-menu__links">
+        {NAV.map((item, i) => (
+          <li>
+            <a href={item.href} data-menu-link>
+              <span class="mono mono-s muted">{String(i + 1).padStart(2, '0')}</span>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <div class="site-menu__foot">
+      <a class="mono" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      <ul role="list" class="site-menu__social">
+        <li><a class="mono" href={SITE.links.telegram} rel="me noopener" target="_blank">Telegram ↗</a></li>
+        <li><a class="mono" href={SITE.links.linkedin} rel="me noopener" target="_blank">LinkedIn ↗</a></li>
+        <li><a class="mono" href={SITE.links.github} rel="me noopener" target="_blank">GitHub ↗</a></li>
+        {cvAvailable && <li><a class="mono" href={SITE.cv} download>CV ↓</a></li>}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .site-header {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: var(--z-header);
+    color: var(--c-cream);
+  }
+
+  .site-header__bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 88px;
+  }
+
+  .site-header__logo {
+    display: inline-flex;
+    padding: 8px 0;
+  }
+
+  .site-header__nav {
+    margin-left: auto;
+  }
+
+  .site-header__nav ul {
+    display: flex;
+    gap: clamp(16px, 3vw, 48px);
+  }
+
+  .site-header__nav a {
+    display: inline-block;
+    padding: 12px 0;
+    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 8px) / 0 1px no-repeat;
+    transition: background-size var(--dur) var(--ease-out);
+  }
+
+  .site-header__nav a:hover {
+    background-size: 100% 1px;
+  }
+
+  .site-header__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px;
+    min-height: 40px;
+    border: 1px solid var(--c-line-dark);
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--c-blue);
+  }
+
+  [data-status='busy'] .dot {
+    background: var(--c-muted-dark);
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+
+  .site-menu[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 860px) {
+    .site-header__status {
+      display: none;
+    }
+
+    .site-header__nav ul {
+      gap: 16px;
+    }
+
+    .site-header__nav a {
+      font-size: var(--fs-mono-s);
+    }
+
+    :global(.js) .site-header__nav {
+      display: none;
+    }
+
+    :global(.js) .menu-toggle {
+      position: fixed;
+      top: 16px;
+      right: var(--gutter);
+      z-index: var(--z-menu);
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--c-indigo);
+      color: var(--c-cream);
+      border: 1px solid var(--c-line-dark);
+    }
+  }
+
+  @media (max-width: 420px) {
+    :global(.no-js) .site-header__bar {
+      flex-wrap: wrap;
+      gap: 0 16px;
+    }
+
+    :global(.no-js) .site-header__nav {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+
+  .menu-toggle__lines {
+    display: grid;
+    gap: 6px;
+    width: 20px;
+  }
+
+  .menu-toggle__lines span {
+    height: 1.5px;
+    background: currentColor;
+    transition: transform var(--dur) var(--ease-out);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-toggle__lines span:first-child {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] .menu-toggle__lines span:last-child {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
+  .site-menu {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-menu) - 1);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .site-menu__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    min-height: 100%;
+    padding-block: 104px 40px;
+  }
+
+  .site-menu__links a {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 10px 0;
+    font-size: clamp(2.5rem, 10vw, 5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .site-menu__foot {
+    margin-top: auto;
+    display: grid;
+    gap: 16px;
+  }
+
+  .site-menu__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+
+  .site-menu__social a,
+  .site-menu__foot > a {
+    display: inline-block;
+    padding: 8px 0;
+  }
+
+  .site-menu__foot > a {
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+</style>
+
+<script>
+  import { initMenu } from '../scripts/menu';
+  initMenu();
+</script>

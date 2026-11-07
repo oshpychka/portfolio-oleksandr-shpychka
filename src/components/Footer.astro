@@ -1,0 +1,63 @@
+---
+import { contact } from '../data/content';
+import { SITE } from '../config/site';
+
+interface Props {
+  cta?: boolean;
+}
+const { cta = false } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  {cta && (
+    <div class="site-footer__cta">
+      <p class="mono muted">Have a project?</p>
+      <a class="site-footer__mail" href="/#contact">Let's talk →</a>
+    </div>
+  )}
+  <div class="site-footer__bar mono mono-s">
+    <p>{contact.footer}</p>
+    <p class="muted">© {year} {SITE.name}</p>
+    <a href="#top">Back to top ↑</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    display: grid;
+    gap: clamp(48px, 8vw, 96px);
+  }
+
+  .site-footer__cta {
+    display: grid;
+    gap: 12px;
+  }
+
+  .site-footer__mail {
+    font-size: var(--fs-h2);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    justify-self: start;
+  }
+
+  .site-footer__mail:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.12em;
+  }
+
+  .site-footer__bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .site-footer__bar a {
+    padding: 4px 0;
+  }
+</style>

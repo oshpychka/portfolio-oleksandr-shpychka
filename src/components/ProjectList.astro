@@ -1,0 +1,94 @@
+---
+import { Image } from 'astro:assets';
+import type { Project } from '../lib/projects';
+
+interface Props {
+  projects: Project[];
+  headingLevel?: 'h3' | 'h2';
+}
+const { projects, headingLevel: Heading = 'h3' } = Astro.props;
+---
+
+<ul role="list" class="plist">
+  {projects.map((p) => (
+    <li class="plist__item" data-type={p.type}>
+      <a class="prow" href={`/work/${p.slug}`}>
+        <span class="prow__media">
+          <Image src={p.cover} alt="" widths={[480, 720, 960]} sizes="(min-width: 640px) 50vw, 100vw" loading="lazy" />
+        </span>
+        <Heading class="prow__title">{p.title}</Heading>
+        <span class="prow__meta mono">
+          <span>{p.role}</span>
+          <span>{p.year}</span>
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .plist {
+    border-top: 1px solid var(--rule);
+  }
+
+  .plist__item {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .prow {
+    display: grid;
+    gap: 16px;
+    padding: 24px 0 28px;
+  }
+
+  .prow__media {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 8 / 5;
+    background: var(--c-indigo);
+    border-radius: 4px;
+  }
+
+  .prow__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .prow__title {
+    font-size: clamp(2rem, 1.3rem + 3.6vw, 5.5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .prow__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    color: var(--muted);
+  }
+
+  @media (hover: hover) and (pointer: fine) and (min-width: 860px) {
+    .prow {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 32px;
+      padding: clamp(32px, 4vw, 56px) clamp(8px, 4vw, 64px);
+      transition: opacity var(--dur) var(--ease-out);
+    }
+
+    .prow__media {
+      display: none;
+    }
+
+    .prow__meta {
+      gap: 48px;
+      color: var(--fg);
+    }
+
+    .plist:has(.prow:hover) .prow:not(:hover) {
+      opacity: 0.32;
+    }
+  }
+</style>

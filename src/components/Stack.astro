@@ -1,0 +1,55 @@
+---
+import SectionHead from './SectionHead.astro';
+import { stack } from '../data/content';
+---
+
+<section class="section stack theme-cream blueprint-grid" id="stack" aria-labelledby="stack-title">
+  <div class="container section-grid">
+    <SectionHead index={3} label="Stack" />
+    <div class="stack__content">
+      <h2 class="section-title" id="stack-title">Stack</h2>
+      <ul role="list" class="stack__words" data-physics-area>
+        {stack.map((word) => <li class="stack__word" data-physics-body>{word}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stack__content {
+    display: grid;
+    gap: clamp(40px, 6vw, 72px);
+  }
+
+  .stack__words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(8px, 1.2vw, 16px);
+  }
+
+  .stack__word {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.9em;
+    padding: 0 0.7em;
+    border: 1px solid var(--fg);
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+    font-size: clamp(1.25rem, 0.9rem + 2vw, 2.75rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-snug);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .stack__word:nth-child(4n + 1) {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .stack__word:nth-child(7n + 3) {
+    border-color: var(--c-blue);
+    background: var(--c-blue);
+    color: var(--c-ink);
+  }
+</style>

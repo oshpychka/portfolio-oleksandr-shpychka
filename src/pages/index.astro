@@ -1,99 +1,33 @@
 ---
 import Base from '../layouts/Base.astro';
-import { Image } from 'astro:assets';
-import { allProjects } from '../lib/projects';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import SelectedWork from '../components/SelectedWork.astro';
+import Stack from '../components/Stack.astro';
+import Experience from '../components/Experience.astro';
+import Contact from '../components/Contact.astro';
+import { meta } from '../data/content';
 import { SITE } from '../config/site';
 
-const swatches = ['black', 'ink', 'cream', 'indigo', 'navy', 'blue', 'violet'];
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.name,
+  jobTitle: SITE.jobTitle,
+  url: SITE.url,
+  email: `mailto:${SITE.email}`,
+  image: new URL('/og.png', SITE.url).href,
+  address: { '@type': 'PostalAddress', addressCountry: 'UA' },
+  knowsAbout: ['React', 'Next.js', 'TypeScript', 'WordPress', 'GSAP', 'Three.js'],
+  sameAs: [SITE.links.github, SITE.links.linkedin, SITE.links.telegram],
+};
 ---
 
-<Base title={`${SITE.name} — OS v2.0 (stage 0)`} description="Stage 0 foundation check: tokens, fonts, grid." noindex>
-  <main id="main">
-    <section class="theme-dark blueprint-grid sample">
-      <div class="container">
-        <p class="mono muted">// SECTION 00 · STATUS: BUILDING</p>
-        <h1>Oleksandr Shpychka</h1>
-        <p class="lead">Stage 0 foundation. This page checks fonts, tokens and the grid and will be replaced in stage 2.</p>
-        <div class="row">
-          <a class="btn btn--primary" href="#cream">Primary</a>
-          <a class="btn" href="#cream">Outline <sup>{allProjects.length}</sup></a>
-        </div>
-        <div class="mark-row marks-line"><span class="plus"></span><span class="mono mono-s">SCROLL TO EXPLORE</span><span class="plus"></span></div>
-      </div>
-    </section>
-
-    <section id="cream" class="theme-cream blueprint-grid sample">
-      <div class="container">
-        <p class="mono muted">// SECTION 01 · TOKENS</p>
-        <h2>Cream section</h2>
-        <ul role="list" class="swatches">
-          {swatches.map((s) => <li><span style={`background: var(--c-${s})`}></span><code class="mono mono-s">--c-{s}</code></li>)}
-        </ul>
-        <div class="row">
-          <a class="btn btn--primary" href="#indigo">Primary</a>
-          <a class="btn" href="#indigo">Outline</a>
-        </div>
-      </div>
-    </section>
-
-    <section id="indigo" class="theme-dark sample">
-      <div class="container">
-        <p class="mono muted">// SECTION 02 · DATA</p>
-        <h2>Projects</h2>
-        <ul role="list" class="projects">
-          {allProjects.map((p) => (
-            <li class="theme-indigo">
-              <Image src={p.cover} alt="" width={480} />
-              <h3>{p.title}</h3>
-              <p class="mono mono-s muted">{p.type} · {p.stack.join(' / ')}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  </main>
+<Base title={meta.home.title} description={meta.home.description} type="profile" jsonLd={jsonLd}>
+  <Hero />
+  <About />
+  <SelectedWork />
+  <Stack />
+  <Experience />
+  <Contact />
 </Base>
-
-<style>
-  .sample {
-    padding-block: var(--section-pad);
-  }
-  .sample .container > * + * {
-    margin-top: 32px;
-  }
-  .lead {
-    font-size: var(--fs-lead);
-    max-width: 36ch;
-    color: var(--muted);
-  }
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .marks-line {
-    padding-top: 48px;
-  }
-  .swatches {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
-  }
-  .swatches span {
-    display: block;
-    aspect-ratio: 3 / 2;
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-  }
-  .projects {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
-  }
-  .projects li {
-    padding: 16px;
-    border-radius: var(--radius-card);
-    display: grid;
-    gap: 12px;
-  }
-</style>

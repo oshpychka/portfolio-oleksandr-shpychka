@@ -16,6 +16,9 @@
 - `REDESIGN.md` — техническое задание.
 - `references/` — скриншоты референсов (`.webp`, палитра Walrus — `.png`).
 - `src/data/projects.ts` — все проекты; новые добавляются только сюда.
+- `src/data/content.ts` — тексты главной (hero, about, stack, experience, contact, мета). Согласованная версия — `docs/copy.md`.
+- `src/config/site.ts` — адрес сайта, контакты, статус AVAILABLE/BUSY.
+- `tools/covers/`, `tools/og/` — генераторы обложек проектов, OG-картинки и иконок (`render.sh`, нужен Google Chrome).
 - `src/assets/projects/<slug>/` — картинки проектов.
 - `public/cv/` — PDF резюме.
 

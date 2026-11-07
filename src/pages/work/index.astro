@@ -1,0 +1,183 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Footer from '../../components/Footer.astro';
+import { allProjects } from '../../lib/projects';
+import type { ProjectType } from '../../data/types';
+import { meta } from '../../data/content';
+
+const labels: Record<ProjectType, string> = { commercial: 'Commercial', personal: 'Personal' };
+const counts = (Object.keys(labels) as ProjectType[])
+  .map((type) => ({ type, label: labels[type], count: allProjects.filter((p) => p.type === type).length }))
+  .filter((f) => f.count > 0);
+const showFilter = counts.length > 1;
+const byYear = [...allProjects].sort((a, b) => Number(b.year) - Number(a.year) || (a.order ?? 0) - (b.order ?? 0));
+---
+
+<Base title={meta.work.title} description={meta.work.description}>
+  <section class="allwork theme-dark blueprint-grid" aria-labelledby="allwork-title">
+    <div class="container allwork__inner">
+      <header class="allwork__head">
+        <p class="mono mono-s muted">// Index · {allProjects.length} projects</p>
+        <h1 id="allwork-title">All work <sup class="mono">{allProjects.length}</sup></h1>
+        <p class="allwork__lead">Client sites and personal builds, newest first.</p>
+      </header>
+
+      {showFilter && (
+        <fieldset class="filter">
+          <legend class="visually-hidden">Filter by type</legend>
+          <label class="btn"><input type="radio" name="type" value="all" checked />All <sup>{allProjects.length}</sup></label>
+          {counts.map((f) => (
+            <label class="btn"><input type="radio" name="type" value={f.type} />{f.label} <sup>{f.count}</sup></label>
+          ))}
+        </fieldset>
+      )}
+
+      <ul role="list" class="grid">
+        {byYear.map((p, i) => (
+          <li class="card" data-type={p.type}>
+            <a href={`/work/${p.slug}`} class="card__link">
+              <span class="card__media">
+                <Image src={p.cover} alt="" widths={[480, 720, 960, 1280]} sizes="(min-width: 860px) 45vw, 100vw" loading={i < 2 ? 'eager' : 'lazy'} />
+              </span>
+              <span class="card__row">
+                <h2 class="card__title">{p.title}</h2>
+                <span class="mono muted">{p.year}</span>
+              </span>
+              <span class="card__meta mono mono-s muted">
+                <span>{p.role}</span>
+                <span>{labels[p.type]}</span>
+              </span>
+              <p class="card__summary">{p.summary}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <Footer cta />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .allwork__inner {
+    display: grid;
+    gap: clamp(48px, 7vw, 96px);
+    padding-top: clamp(140px, 16vw, 220px);
+    padding-bottom: 32px;
+  }
+
+  .allwork__head {
+    display: grid;
+    gap: 20px;
+  }
+
+  .allwork__head sup {
+    font-size: 0.2em;
+    vertical-align: top;
+    letter-spacing: 0;
+  }
+
+  .allwork__lead {
+    font-size: var(--fs-lead);
+    color: var(--muted);
+  }
+
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    border: 0;
+    padding: 0;
+  }
+
+  .filter label {
+    cursor: pointer;
+  }
+
+  .filter input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .filter label:has(input:checked) {
+    --btn-bg: var(--c-cream);
+    --btn-fg: var(--c-ink);
+    --btn-border: var(--c-cream);
+  }
+
+  .filter label:has(input:focus-visible) {
+    outline: 2px solid var(--c-blue);
+    outline-offset: 3px;
+  }
+
+  .allwork__inner:has(.filter input[value='commercial']:checked) .card:not([data-type='commercial']),
+  .allwork__inner:has(.filter input[value='personal']:checked) .card:not([data-type='personal']) {
+    display: none;
+  }
+
+  .grid {
+    display: grid;
+    gap: clamp(48px, 6vw, 80px) clamp(24px, 3vw, 40px);
+  }
+
+  .card__link {
+    display: grid;
+    gap: 14px;
+  }
+
+  .card__media {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 8 / 5;
+    background: var(--c-indigo);
+    border-radius: 4px;
+  }
+
+  .card__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .card__title {
+    font-size: var(--fs-h3);
+    line-height: 1.05;
+    letter-spacing: var(--tracking-snug);
+  }
+
+  .card__meta {
+    display: flex;
+    gap: 16px;
+  }
+
+  .card__summary {
+    color: var(--muted);
+    max-width: 52ch;
+  }
+
+  .card__link:hover .card__title {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.12em;
+  }
+
+  @media (min-width: 860px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card:nth-child(even) {
+      margin-top: clamp(80px, 10vw, 160px);
+    }
+  }
+</style>

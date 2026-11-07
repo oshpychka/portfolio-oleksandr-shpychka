@@ -167,3 +167,7 @@ p {
     scroll-behavior: auto !important;
   }
 }
+
+html.menu-open {
+  overflow: hidden;
+}

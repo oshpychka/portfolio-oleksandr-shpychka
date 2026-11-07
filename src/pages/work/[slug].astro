@@ -1,0 +1,238 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Footer from '../../components/Footer.astro';
+import { allProjects, getNextProject, type Project } from '../../lib/projects';
+import { SITE } from '../../config/site';
+
+export const getStaticPaths = (() =>
+  allProjects.map((project) => ({ params: { slug: project.slug }, props: { project } }))) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const next = getNextProject(project.slug);
+const index = allProjects.findIndex((p) => p.slug === project.slug) + 1;
+const typeLabel = project.type === 'commercial' ? 'Commercial' : 'Personal';
+const blocks = [
+  { title: 'Challenge', text: project.challenge },
+  { title: 'Solution', text: project.solution },
+  { title: 'Result', text: project.result },
+].filter((b): b is { title: string; text: string } => Boolean(b.text));
+const title = `${project.title} — case study — ${SITE.name}`;
+---
+
+<Base title={title} description={project.summary} type="article">
+  <article>
+    <header class="case-hero theme-dark blueprint-grid">
+      <div class="container case-hero__inner">
+        <p class="mono mono-s muted">
+          <a class="link-u" href="/work">Work</a> / Case {String(index).padStart(2, '0')} · {typeLabel}
+        </p>
+        <h1 class="case-hero__title">{project.title}</h1>
+        <p class="case-hero__summary">{project.summary}</p>
+        <dl class="meta mono">
+          <div><dt>Year</dt><dd>{project.year}</dd></div>
+          <div><dt>Role</dt><dd>{project.role}</dd></div>
+          <div><dt>Type</dt><dd>{typeLabel}</dd></div>
+          <div class="meta__stack"><dt>Stack</dt><dd>{project.stack.join(' / ')}</dd></div>
+        </dl>
+        {(project.liveUrl || project.codeUrl) && (
+          <div class="case-hero__actions">
+            {project.liveUrl && <a class="btn btn--primary" href={project.liveUrl} target="_blank" rel="noopener">Live site ↗</a>}
+            {project.codeUrl && <a class="btn" href={project.codeUrl} target="_blank" rel="noopener">Source code ↗</a>}
+          </div>
+        )}
+        <figure class="case-cover marks">
+          <div class="frame">
+            <Image src={project.cover} alt={`${project.title} cover`} widths={[640, 960, 1280, 1920, 2400]} sizes="(min-width: 1440px) 1392px, calc(100vw - 2 * var(--gutter))" loading="eager" fetchpriority="high" />
+          </div>
+        </figure>
+      </div>
+    </header>
+
+    {blocks.length > 0 && (
+      <section class="case-text theme-cream blueprint-grid" aria-label="Case study">
+        <div class="container case-text__inner">
+          {blocks.map((block, i) => (
+            <div class="block">
+              <p class="mono block__label">{String(i + 1).padStart(2, '0')} — {block.title}</p>
+              <h2 class="visually-hidden">{block.title}</h2>
+              <p class="block__text">{block.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {project.gallery.length > 0 && (
+      <section class="case-gallery theme-dark" aria-label="Gallery">
+        <div class="container case-gallery__inner">
+          {project.gallery.map((img, i) => (
+            <figure class="frame frame--auto">
+              <Image src={img} alt={`${project.title}, screen ${i + 1}`} widths={[640, 960, 1280, 1920]} sizes="(min-width: 1440px) 1392px, 100vw" loading="lazy" />
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+
+  <section class="next theme-dark" aria-label="Next project">
+    <div class="container next__inner">
+      {next && next.slug !== project.slug && (
+        <a class="next__link" href={`/work/${next.slug}`}>
+          <span class="mono muted">Next project</span>
+          <span class="next__title">{next.title} →</span>
+        </a>
+      )}
+      <a class="mono link-u next__all" href="/work">← All work</a>
+      <Footer cta />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .case-hero__inner {
+    display: grid;
+    gap: 28px;
+    padding-top: clamp(140px, 16vw, 200px);
+    padding-bottom: var(--section-pad);
+  }
+
+  .case-hero__title {
+    max-width: 14ch;
+  }
+
+  .case-hero__summary {
+    font-size: var(--fs-lead);
+    max-width: 44ch;
+    color: var(--muted);
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding-block: 24px;
+    border-block: 1px solid var(--rule);
+  }
+
+  .meta dt {
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .meta dd {
+    margin: 0;
+  }
+
+  .meta__stack {
+    grid-column: 1 / -1;
+  }
+
+  .case-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .case-cover {
+    margin-top: clamp(24px, 4vw, 56px);
+  }
+
+  .frame {
+    overflow: hidden;
+    aspect-ratio: 8 / 5;
+    background: var(--c-indigo);
+    border-radius: 4px;
+  }
+
+  .frame--auto {
+    aspect-ratio: auto;
+  }
+
+  .frame :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .case-text__inner {
+    display: grid;
+    gap: clamp(48px, 7vw, 96px);
+    padding-block: var(--section-pad);
+  }
+
+  .block {
+    display: grid;
+    gap: 16px;
+  }
+
+  .block__label {
+    color: var(--accent);
+  }
+
+  .block__text {
+    font-size: clamp(1.25rem, 1rem + 1.2vw, 2.25rem);
+    line-height: 1.3;
+    letter-spacing: var(--tracking-snug);
+    max-width: 38ch;
+  }
+
+  .case-gallery__inner {
+    display: grid;
+    gap: 24px;
+    padding-block: var(--section-pad);
+  }
+
+  .next__inner {
+    display: grid;
+    gap: 40px;
+    padding-top: var(--section-pad);
+    padding-bottom: 32px;
+    border-top: 1px solid var(--c-line-dark);
+  }
+
+  .next__link {
+    display: grid;
+    gap: 16px;
+  }
+
+  .next__title {
+    font-size: var(--fs-h1);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .next__link:hover .next__title {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.1em;
+  }
+
+  .next__all {
+    justify-self: start;
+    padding: 6px 0;
+  }
+
+  @media (min-width: 860px) {
+    .meta {
+      grid-template-columns: repeat(3, auto) 1fr;
+      gap: 48px;
+    }
+
+    .meta__stack {
+      grid-column: auto;
+    }
+
+    .block {
+      grid-template-columns: 240px 1fr;
+      gap: 40px;
+    }
+  }
+</style>

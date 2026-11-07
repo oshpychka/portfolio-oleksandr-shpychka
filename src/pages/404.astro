@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import { meta } from '../data/content';
+import { SITE } from '../config/site';
+---
+
+<Base title={meta.notFound.title} description={meta.notFound.description} noindex>
+  <section class="nf theme-dark blueprint-grid" aria-labelledby="nf-title">
+    <div class="container nf__inner">
+      <p class="mono mono-s muted">Error 404 · OS v{SITE.version}</p>
+      <div class="nf__body">
+        <h1 id="nf-title">Blueprint not found</h1>
+        <p class="nf__text">This page fell off the drawing board. Put the modules back in place, or skip the puzzle.</p>
+        <a class="btn btn--primary" href="/">Back home</a>
+      </div>
+      <div class="mark-row" aria-hidden="true"><span class="plus"></span><span class="plus"></span></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf__inner {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 40px;
+    min-height: 100svh;
+    padding-top: 120px;
+    padding-bottom: 32px;
+  }
+
+  .nf__body {
+    align-self: center;
+    display: grid;
+    gap: 28px;
+    justify-items: start;
+  }
+
+  .nf__body h1 {
+    max-width: 10ch;
+  }
+
+  .nf__text {
+    font-size: var(--fs-lead);
+    max-width: 36ch;
+    color: var(--muted);
+  }
+</style>

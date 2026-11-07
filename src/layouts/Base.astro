@@ -4,37 +4,45 @@ import '@fontsource-variable/geist-mono/wght.css';
 import geistLatin from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
 import geistMonoLatin from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
 import '../styles/global.css';
-import { SITE } from '../config/site';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
 
 interface Props {
   title: string;
   description: string;
+  image?: string;
+  type?: 'website' | 'article' | 'profile';
   noindex?: boolean;
+  jsonLd?: Record<string, unknown>;
 }
 
-const { title, description, noindex = false } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const props = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
-    <meta name="author" content={SITE.name} />
+    <script is:inline>document.documentElement.classList.replace('no-js', 'js');</script>
+    <Seo {...props} />
     <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="dark light" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="preload" href={geistLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={geistMonoLatin} as="font" type="font/woff2" crossorigin />
     <slot name="head" />
   </head>
   <body class="theme-dark">
     <a class="skip-link mono" href="#main">Skip to content</a>
-    <slot />
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <slot name="after" />
   </body>
 </html>

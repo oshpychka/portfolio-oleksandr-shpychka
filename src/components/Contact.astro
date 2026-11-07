@@ -1,0 +1,125 @@
+---
+import SectionHead from './SectionHead.astro';
+import Footer from './Footer.astro';
+import { contact } from '../data/content';
+import { SITE } from '../config/site';
+import { cvAvailable } from '../lib/cv';
+
+const links = [
+  { label: 'Telegram', href: SITE.links.telegram },
+  { label: 'LinkedIn', href: SITE.links.linkedin },
+  { label: 'GitHub', href: SITE.links.github },
+];
+---
+
+<section class="section contact theme-cream blueprint-grid" id="contact" aria-labelledby="contact-title">
+  <div class="container contact__inner">
+    <div class="section-grid">
+      <SectionHead index={5} label="Contact" />
+      <div class="contact__content">
+        <h2 class="contact__title" id="contact-title">{contact.heading}</h2>
+        <p class="contact__line">{contact.line}</p>
+
+        <div class="contact__mail">
+          <a class="contact__email" href={`mailto:${SITE.email}`} data-copy={SITE.email}>{SITE.email}</a>
+          <p class="mono mono-s muted contact__hint" hidden data-copy-hint>
+            <span data-copy-label>Click to copy</span>
+            <span aria-hidden="true">·</span>
+            <a class="link-u" href={`mailto:${SITE.email}`}>Open mail app ↗</a>
+          </p>
+          <p class="visually-hidden" role="status" data-copy-status></p>
+        </div>
+
+        <ul role="list" class="contact__links">
+          {links.map((link) => (
+            <li><a class="btn" href={link.href} rel="me noopener" target="_blank">{link.label} ↗</a></li>
+          ))}
+          {cvAvailable && <li><a class="btn" href={SITE.cv} download>CV ↓</a></li>}
+        </ul>
+
+        <p class="contact__time mono">
+          <span>Local time</span>
+          <time hidden data-clock-wrap><span data-clock></span></time>
+          <span>· {SITE.city}</span>
+          <span class="muted">— {contact.replies}</span>
+        </p>
+      </div>
+    </div>
+    <Footer />
+  </div>
+</section>
+
+<style>
+  .contact__inner {
+    display: grid;
+    gap: clamp(96px, 14vw, 200px);
+  }
+
+  .contact__content {
+    display: grid;
+    gap: 32px;
+  }
+
+  .contact__title {
+    font-size: var(--fs-display);
+    line-height: 0.86;
+    letter-spacing: -0.055em;
+    text-transform: uppercase;
+    margin-left: -0.04em;
+  }
+
+  .contact__line {
+    font-size: var(--fs-lead);
+    max-width: 34ch;
+  }
+
+  .contact__mail {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .contact__email {
+    justify-self: start;
+    font-size: clamp(1.5rem, 0.6rem + 4.4vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    border-bottom: 2px solid currentColor;
+  }
+
+  .contact__hint {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .contact__hint[hidden] {
+    display: none;
+  }
+
+  [data-copied] [data-copy-label] {
+    color: var(--accent);
+  }
+
+  .contact__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .contact__time {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+</style>
+
+<script>
+  import { initCopy } from '../scripts/copy';
+  import { initClocks } from '../scripts/clock';
+  import { SITE } from '../config/site';
+  initCopy();
+  initClocks(SITE.timeZone);
+</script>

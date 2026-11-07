@@ -5,6 +5,7 @@
   --rule: var(--c-line-dark);
   --grid: var(--c-grid-dark);
   --mark: rgba(247, 245, 240, 0.4);
+  --accent: var(--c-blue);
   background-color: var(--bg);
   color: var(--fg);
 }
@@ -16,6 +17,7 @@
   --rule: var(--c-line-light);
   --grid: var(--c-grid-light);
   --mark: var(--c-ink);
+  --accent: var(--c-blue-deep);
   background-color: var(--bg);
   color: var(--fg);
   color-scheme: light;
@@ -28,6 +30,7 @@
   --rule: var(--c-line-dark);
   --grid: var(--c-grid-dark);
   --mark: rgba(247, 245, 240, 0.4);
+  --accent: var(--c-blue);
   background-color: var(--bg);
   color: var(--fg);
 }

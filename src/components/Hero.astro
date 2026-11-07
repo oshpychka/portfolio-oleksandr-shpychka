@@ -1,0 +1,138 @@
+---
+import { hero } from '../data/content';
+import { SITE } from '../config/site';
+import { cvAvailable } from '../lib/cv';
+---
+
+<section class="hero theme-dark blueprint-grid" aria-labelledby="hero-title">
+  <div class="container hero__inner">
+    <div class="hero__sys mono mono-s muted" aria-hidden="true">
+      <span>// OS v{SITE.version}</span>
+      <span>Status: {SITE.status === 'available' ? 'Available' : 'Busy'}</span>
+      <span hidden data-clock-wrap>Sys.time <span data-clock></span> {SITE.city}</span>
+    </div>
+
+    <h1 class="hero__title" id="hero-title">
+      <span>{SITE.firstName}</span>
+      <span>Shpychka</span>
+    </h1>
+
+    <div class="hero__body">
+      <p class="hero__line">{hero.line}</p>
+      <ul role="list" class="hero__facts mono">
+        {hero.facts.map((fact) => <li>{fact}</li>)}
+      </ul>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#contact">Start a project</a>
+        {cvAvailable && <a class="btn" href={SITE.cv} download>Download CV</a>}
+      </div>
+    </div>
+
+    <div class="hero__foot mark-row mono mono-s" aria-hidden="true">
+      <span class="plus"></span>
+      <span class="plus hide-s"></span>
+      <span>Scroll to explore</span>
+      <span class="plus hide-s"></span>
+      <span class="plus"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+  }
+
+  .hero__inner {
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: clamp(32px, 5vw, 56px);
+    min-height: 100svh;
+    padding-top: 120px;
+    padding-bottom: 32px;
+  }
+
+  .hero__sys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 32px;
+  }
+
+  .hero__title {
+    align-self: end;
+    display: grid;
+    font-size: var(--fs-display);
+    line-height: 0.86;
+    letter-spacing: -0.055em;
+    margin-left: -0.05em;
+  }
+
+  .hero__body {
+    display: grid;
+    gap: 28px;
+    max-width: 880px;
+  }
+
+  .hero__line {
+    font-size: var(--fs-lead);
+    line-height: 1.35;
+    max-width: 40ch;
+  }
+
+  .hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 0;
+    color: var(--muted);
+  }
+
+  .hero__facts li:not(:last-child)::after {
+    content: '+';
+    margin-inline: 16px;
+    color: var(--fg);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .hero__foot {
+    color: var(--muted);
+  }
+
+  @media (max-width: 640px) {
+    .hide-s {
+      display: none;
+    }
+
+    .hero__facts {
+      display: grid;
+      gap: 6px;
+    }
+
+    .hero__facts li::before {
+      content: '+';
+      margin-right: 12px;
+      color: var(--fg);
+    }
+
+    .hero__facts li:not(:last-child)::after {
+      content: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero__body {
+      grid-template-columns: 1.2fr 1fr;
+      align-items: end;
+      max-width: none;
+      column-gap: 64px;
+    }
+
+    .hero__line {
+      grid-row: span 2;
+    }
+  }
+</style>

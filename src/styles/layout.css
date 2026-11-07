@@ -1,0 +1,37 @@
+.section {
+  position: relative;
+  padding-block: var(--section-pad);
+}
+
+.section-grid {
+  display: grid;
+  gap: 32px;
+}
+
+@media (min-width: 1024px) {
+  .section-grid {
+    grid-template-columns: minmax(140px, 2fr) 10fr;
+    gap: clamp(32px, 4vw, 64px);
+  }
+}
+
+.section-title {
+  font-size: var(--fs-h2);
+}
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.link-u {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+.link-u:hover {
+  text-decoration-color: currentColor;
+}

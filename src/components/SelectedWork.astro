@@ -1,0 +1,29 @@
+---
+import SectionHead from './SectionHead.astro';
+import ProjectList from './ProjectList.astro';
+import { allProjects, featuredProjects } from '../lib/projects';
+---
+
+<section class="section work theme-dark" id="work" aria-labelledby="work-title">
+  <div class="container section-grid">
+    <SectionHead index={2} label="Selected work" />
+    <div class="work__content">
+      <h2 class="section-title" id="work-title">Selected work</h2>
+      <ProjectList projects={featuredProjects} />
+      <a class="btn work__all" href="/work">All work <sup>{allProjects.length}</sup></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .work__content {
+    display: grid;
+    gap: clamp(40px, 6vw, 72px);
+  }
+
+  .work__all {
+    justify-self: center;
+    min-height: 64px;
+    padding-inline: 2.5em;
+  }
+</style>
