@@ -132,52 +132,61 @@ function sampleTail(segments: Segment[], lettersLength: number) {
   return { samplesLength: Float32Array.from(lengths), samplesY: Float32Array.from(ys) };
 }
 
+interface Chunk {
+  svg: SVGSVGElement;
+  path: SVGPathElement;
+  from: number;
+  to: number;
+  dash: string;
+}
+
+function segmentPath(segments: Segment[]) {
+  return segments
+    .map((s) => (s.c ? ` L ${fmt(s.a.x)} ${fmt(s.a.y)} Q ${fmt(s.c.x)} ${fmt(s.c.y)} ${fmt(s.b.x)} ${fmt(s.b.y)}` : ` L ${fmt(s.b.x)} ${fmt(s.b.y)}`))
+    .join('');
+}
+
+function pointOn(segments: Segment[], len: number): Point | null {
+  let lo = 0;
+  let hi = segments.length - 1;
+  if (hi < 0 || len < segments[0].start) return null;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (segments[mid].start <= len) lo = mid;
+    else hi = mid - 1;
+  }
+  const s = segments[lo];
+  const t = Math.min(1, Math.max(0, (len - s.start) / s.length));
+  if (!s.c) return { x: s.a.x + (s.b.x - s.a.x) * t, y: s.a.y + (s.b.y - s.a.y) * t };
+  const mt = 1 - t;
+  return { x: mt * mt * s.a.x + 2 * mt * t * s.c.x + t * t * s.b.x, y: mt * mt * s.a.y + 2 * mt * t * s.c.y + t * t * s.b.y };
+}
+
 export function initLine() {
   const hero = document.querySelector<HTMLElement>('[data-line-hero]');
   const anchor = document.querySelector<HTMLElement>('[data-logo-anchor]');
   if (!hero || !anchor) return () => {};
 
   const root = document.documentElement;
-  const svg = document.createElementNS(NS, 'svg');
-  svg.classList.add('trace');
-  svg.setAttribute('aria-hidden', 'true');
-  svg.innerHTML = `
-    <defs>
-      <clipPath id="trace-clip-hero"></clipPath>
-      <clipPath id="trace-clip-dark"></clipPath>
-      <clipPath id="trace-clip-cream"></clipPath>
-    </defs>
-    <g clip-path="url(#trace-clip-hero)"><path class="trace__path trace__path--hero"></path></g>
-    <g clip-path="url(#trace-clip-dark)"><path class="trace__path trace__path--dark"></path></g>
-    <g clip-path="url(#trace-clip-cream)"><path class="trace__path trace__path--cream"></path></g>
-    <g class="trace__nodes"></g>
-    <circle class="trace__head" r="7" cx="-50" cy="-50"></circle>`;
-  document.body.appendChild(svg);
+  const layer = document.createElement('div');
+  layer.className = 'trace';
+  layer.setAttribute('aria-hidden', 'true');
+  const headDot = document.createElement('span');
+  headDot.className = 'trace__head';
+  document.body.appendChild(layer);
   root.classList.add('has-line');
-
-  const paths = [...svg.querySelectorAll<SVGPathElement>('.trace__path')];
-  const nodesGroup = svg.querySelector<SVGGElement>('.trace__nodes')!;
-  const headDot = svg.querySelector<SVGCircleElement>('.trace__head')!;
-  let lastHead = -1;
-  const clips: Record<Tone, SVGClipPathElement> = {
-    hero: svg.querySelector('#trace-clip-hero')!,
-    dark: svg.querySelector('#trace-clip-dark')!,
-    cream: svg.querySelector('#trace-clip-cream')!,
-  };
 
   const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   const desktopQuery = window.matchMedia(DESKTOP);
 
   let geo: Geometry | null = null;
+  let chunks: Chunk[] = [];
+  let segments: Segment[] = [];
+  let lettersPath: SVGPathElement | null = null;
   const state = { start: 0, head: 0, intro: 0, wiggle: 0 };
 
   const build = (): Geometry => {
     const width = document.documentElement.clientWidth;
-    const height = document.documentElement.scrollHeight;
-    svg.setAttribute('width', String(width));
-    svg.setAttribute('height', String(height));
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
     const isDesktop = desktopQuery.matches;
     const container = hero.querySelector<HTMLElement>('.container') ?? hero;
     const gutter = parseFloat(getComputedStyle(container).paddingLeft) || 16;
@@ -189,7 +198,7 @@ export function initLine() {
     const sections = [...document.querySelectorAll<HTMLElement>('main > section')];
     const heroRect = docRect(hero);
     const pts: Point[] = [letters.exit, { x: laneR, y: letters.exit.y }];
-    const nodeSpecs: Array<{ point: Point; tone: Tone; labels: HTMLElement[]; item?: HTMLElement }> = [];
+    const nodeSpecs: Array<{ point: Point; tone: Tone; labels: HTMLElement[]; item?: HTMLElement; section: HTMLElement }> = [];
     const last = () => pts[pts.length - 1];
 
     sections.forEach((section, index) => {
@@ -208,7 +217,7 @@ export function initLine() {
       }
       const nodePoint = { x: laneL, y: nodeY };
       pts.push(nodePoint);
-      nodeSpecs.push({ point: nodePoint, tone, labels: head ? [...head.querySelectorAll<HTMLElement>('[data-scramble="node"]')] : [] });
+      nodeSpecs.push({ point: nodePoint, tone, section, labels: head ? [...head.querySelectorAll<HTMLElement>('[data-scramble="node"]')] : [] });
 
       const timeline = section.querySelector<HTMLElement>('[data-timeline]');
       if (timeline) {
@@ -219,7 +228,7 @@ export function initLine() {
         timeline.querySelectorAll<HTMLElement>(':scope > li').forEach((item) => {
           const p = { x: axisX, y: docRect(item).top + 10.5 };
           pts.push(p);
-          nodeSpecs.push({ point: p, tone, labels: [], item });
+          nodeSpecs.push({ point: p, tone, section, labels: [], item });
         });
       }
 
@@ -238,19 +247,63 @@ export function initLine() {
 
     const probe = document.createElementNS(NS, 'path');
     probe.setAttribute('d', letters.d);
-    svg.appendChild(probe);
+    const probeSvg = document.createElementNS(NS, 'svg');
+    probeSvg.appendChild(probe);
+    layer.appendChild(probeSvg);
     const lettersLength = probe.getTotalLength();
-    probe.remove();
+    probeSvg.remove();
 
     const tail = buildTail(pts, radius, lettersLength);
-    const d = `${letters.d}${tail.d}`;
-    paths.forEach((p) => p.setAttribute('d', d));
-    lastHead = -1;
-    headDot.setAttribute('r', isDesktop ? '7' : '5');
+    segments = tail.segments;
     const { samplesLength, samplesY } = sampleTail(tail.segments, lettersLength);
 
     const previous = geo?.nodes ?? [];
-    nodesGroup.replaceChildren();
+    layer.replaceChildren();
+    layer.style.height = `${document.documentElement.scrollHeight}px`;
+    chunks = [];
+    lettersPath = null;
+    const sectionChunk = new Map<HTMLElement, SVGSVGElement>();
+
+    sections.forEach((section) => {
+      const r = docRect(section);
+      const tone = toneOf(section);
+      const top = r.top;
+      const bottom = r.top + r.height;
+      const inside = tail.segments.filter((s) => Math.max(s.a.y, s.b.y, s.c?.y ?? -Infinity) >= top - 4 && Math.min(s.a.y, s.b.y, s.c?.y ?? Infinity) <= bottom + 4);
+      const isHero = section === hero;
+      if (!inside.length && !isHero) return;
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', `trace__chunk trace__chunk--${tone}`);
+      svg.setAttribute('width', String(width));
+      svg.setAttribute('height', fmt(r.height));
+      svg.setAttribute('viewBox', `0 ${fmt(top)} ${width} ${fmt(r.height)}`);
+      svg.style.transform = `translateY(${fmt(top)}px)`;
+      const path = document.createElementNS(NS, 'path');
+      path.setAttribute('class', 'trace__path');
+      let from: number;
+      let to: number;
+      if (isHero) {
+        path.setAttribute('d', `${letters.d}${segmentPath(inside)}`);
+        from = 0;
+        to = inside.length ? inside[inside.length - 1].start + inside[inside.length - 1].length : lettersLength;
+        const lp = document.createElementNS(NS, 'path');
+        lp.setAttribute('d', letters.d);
+        lp.setAttribute('visibility', 'hidden');
+        svg.appendChild(lp);
+        lettersPath = lp;
+      } else {
+        path.setAttribute('d', `M ${fmt(inside[0].a.x)} ${fmt(inside[0].a.y)}${segmentPath(inside)}`);
+        from = inside[0].start;
+        to = inside[inside.length - 1].start + inside[inside.length - 1].length;
+      }
+      path.setAttribute('visibility', 'hidden');
+      svg.appendChild(path);
+      layer.appendChild(svg);
+      chunks.push({ svg, path, from, to, dash: '' });
+      sectionChunk.set(section, svg);
+    });
+    layer.appendChild(headDot);
+
     const nodes: Node[] = nodeSpecs.map((spec, i) => {
       const node: Node = {
         length: tail.vertexLength.get(spec.point) ?? tail.end,
@@ -260,33 +313,18 @@ export function initLine() {
         item: spec.item,
         lit: previous[i]?.lit ?? false,
       };
-      if (!spec.item) {
+      const host = sectionChunk.get(spec.section);
+      if (!spec.item && host) {
         const c = document.createElementNS(NS, 'circle');
         c.setAttribute('cx', fmt(spec.point.x));
         c.setAttribute('cy', fmt(spec.point.y));
         c.setAttribute('r', isDesktop ? '6' : '5');
         c.classList.add('trace__node', `trace__node--${spec.tone}`);
         c.classList.toggle('is-lit', node.lit);
-        nodesGroup.appendChild(c);
+        host.appendChild(c);
         node.circle = c;
       }
       return node;
-    });
-
-    (Object.keys(clips) as Tone[]).forEach((tone) => {
-      clips[tone].replaceChildren(
-        ...sections
-          .filter((s) => toneOf(s) === tone)
-          .map((s) => {
-            const r = docRect(s);
-            const rect = document.createElementNS(NS, 'rect');
-            rect.setAttribute('x', '0');
-            rect.setAttribute('y', fmt(r.top));
-            rect.setAttribute('width', String(width));
-            rect.setAttribute('height', fmt(r.height));
-            return rect;
-          }),
-      );
     });
 
     return {
@@ -330,23 +368,47 @@ export function initLine() {
     });
   };
 
+  let lastHead = -1;
   const render = () => {
     if (!geo) return;
     const head = Math.min(geo.total, Math.max(0, (state.head + state.wiggle) * state.intro));
     const start = Math.min(state.start, head);
-    const visible = Math.max(0, head - start);
-    const dash = `${visible.toFixed(1)} ${(geo.total + 10).toFixed(1)}`;
-    const offset = (-start).toFixed(1);
-    paths.forEach((p) => {
-      p.style.strokeDasharray = dash;
-      p.style.strokeDashoffset = offset;
-    });
+    for (const chunk of chunks) {
+      const len = chunk.to - chunk.from;
+      const vs = Math.max(0, start - chunk.from);
+      const ve = Math.min(len, head - chunk.from);
+      let dash: string;
+      if (ve - vs <= 0.5) dash = 'hidden';
+      else if (vs <= 0 && ve >= len) dash = 'full';
+      else dash = `${(ve - vs).toFixed(1)}|${(-vs).toFixed(1)}|${(len + 10).toFixed(0)}`;
+      if (dash === chunk.dash) continue;
+      chunk.dash = dash;
+      if (dash === 'hidden') {
+        chunk.path.setAttribute('visibility', 'hidden');
+      } else if (dash === 'full') {
+        chunk.path.removeAttribute('visibility');
+        chunk.path.style.strokeDasharray = '';
+        chunk.path.style.strokeDashoffset = '';
+      } else {
+        const [v, o, gap] = dash.split('|');
+        chunk.path.removeAttribute('visibility');
+        chunk.path.style.strokeDasharray = `${v} ${gap}`;
+        chunk.path.style.strokeDashoffset = o;
+      }
+    }
     if (Math.abs(head - lastHead) > 0.4) {
       lastHead = head;
-      const pt = paths[0].getPointAtLength(Math.max(0, head - 0.5));
-      headDot.setAttribute('cx', pt.x.toFixed(1));
-      headDot.setAttribute('cy', pt.y.toFixed(1));
-      headDot.classList.toggle('is-on', state.intro >= 1 && visible > 1);
+      let pt: Point | null = null;
+      if (head < geo.lettersLength) {
+        if (lettersPath) {
+          const p = lettersPath.getPointAtLength(Math.max(0, head));
+          pt = { x: p.x, y: p.y };
+        }
+      } else {
+        pt = pointOn(segments, head);
+      }
+      if (pt) headDot.style.transform = `translate3d(${pt.x.toFixed(1)}px, ${pt.y.toFixed(1)}px, 0)`;
+      headDot.classList.toggle('is-on', state.intro >= 1 && head - start > 1);
     }
     geo.nodes.forEach((node) => {
       const reached = head >= node.length - 1;
@@ -360,7 +422,6 @@ export function initLine() {
       }
     });
   };
-
   const tug = (k: number) => k * (geo?.stub ?? 20);
   const idle = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.9, repeatRefresh: true, onUpdate: render });
   idle
@@ -442,6 +503,7 @@ export function initLine() {
       lastWidth = w;
       lastHeight = h;
       geo = build();
+      lastHead = -1;
       sync(false);
     }, 200);
   };
@@ -459,7 +521,7 @@ export function initLine() {
     intro?.kill();
     idle.kill();
     gsap.killTweensOf(state);
-    svg.remove();
+    layer.remove();
     root.classList.remove('has-line');
     geo = null;
   };

@@ -47,9 +47,16 @@ main article > section > .container {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
   z-index: 3;
   pointer-events: none;
-  overflow: visible;
+}
+
+.trace__chunk {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
 }
 
 .trace__path {
@@ -59,29 +66,35 @@ main article > section > .container {
   stroke-linejoin: round;
 }
 
-.trace__path--hero {
+.trace__chunk--hero .trace__path {
   stroke: var(--c-cream);
   stroke-width: 3.5px;
 }
 
+.trace__chunk--dark .trace__path {
+  stroke: rgba(247, 245, 240, 0.62);
+}
+
+.trace__chunk--cream .trace__path {
+  stroke: var(--c-blue-deep);
+}
+
 .trace__head {
-  fill: var(--c-blue);
-  stroke: var(--c-cream);
-  stroke-width: 2px;
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c-blue);
+  box-shadow: 0 0 0 2px var(--c-cream);
   opacity: 0;
   transition: opacity 0.4s linear;
+  will-change: transform;
 }
 
 .trace__head.is-on {
   opacity: 1;
-}
-
-.trace__path--dark {
-  stroke: rgba(247, 245, 240, 0.62);
-}
-
-.trace__path--cream {
-  stroke: var(--c-blue-deep);
 }
 
 .trace__node {
@@ -111,12 +124,21 @@ main article > section > .container {
   transform: scale(1.35);
 }
 
+@media (max-width: 860px) {
+  .trace__head {
+    top: -5px;
+    left: -5px;
+    width: 10px;
+    height: 10px;
+  }
+}
+
 @media (min-width: 861px) {
   .trace__path {
     stroke-width: 3px;
   }
 
-  .trace__path--hero {
+  .trace__chunk--hero .trace__path {
     stroke-width: 5.5px;
   }
 }

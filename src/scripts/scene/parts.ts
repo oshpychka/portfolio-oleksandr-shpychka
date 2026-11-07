@@ -17,7 +17,7 @@ export interface Part {
 }
 
 const TUBE = 0.16;
-const RADIAL = 18;
+const RADIAL = 12;
 
 type P = [number, number];
 
@@ -60,13 +60,13 @@ function roundedPath(points: P[], r: number, closed: boolean) {
 
 function tube(points: P[], r: number, closed = false, caps: number = TUBE) {
   const path = roundedPath(points, r, closed);
-  const segments = Math.max(48, Math.round(path.getLength() * 40));
+  const segments = Math.max(32, Math.round(path.getLength() * 22));
   const body = new TubeGeometry(path, segments, TUBE, RADIAL, closed);
   const parts: BufferGeometry[] = [body];
   if (!closed) {
     const [sx, sy] = points[0];
     const [ex, ey] = points[points.length - 1];
-    parts.push(new SphereGeometry(caps, 20, 14).translate(sx, sy, 0), new SphereGeometry(caps, 20, 14).translate(ex, ey, 0));
+    parts.push(new SphereGeometry(caps, 14, 10).translate(sx, sy, 0), new SphereGeometry(caps, 14, 10).translate(ex, ey, 0));
   }
   const merged = mergeGeometries(parts.map((g) => g.toNonIndexed()))!;
   parts.forEach((g) => g.dispose());
@@ -75,7 +75,7 @@ function tube(points: P[], r: number, closed = false, caps: number = TUBE) {
 }
 
 export function makeParts(): Part[] {
-  const ring = new TorusGeometry(0.42, TUBE, RADIAL, 56).toNonIndexed();
+  const ring = new TorusGeometry(0.42, TUBE, RADIAL, 40).toNonIndexed();
   ring.computeBoundingSphere();
   return [
     { name: 'o', geometry: tube([[-0.8, -0.8], [0.8, -0.8], [0.8, 0.8], [-0.8, 0.8]], 0.32, true), radius: 1.18 },

@@ -75,7 +75,7 @@ export const experience: Job[] = [
     from: 'Jan 2025',
     to: 'Nov 2026',
     company: 'Consultant LM LLC',
-    role: 'WordPress Developer',
+    role: 'Frontend / WordPress Developer',
     points: [
       'Built WordPress sites and custom websites for clients.',
       'Connected online payments.',

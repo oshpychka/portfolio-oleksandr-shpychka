@@ -21,6 +21,8 @@ export function initCursor() {
   const pos = { x: -100, y: -100 };
   let state: State = 'cross';
   let onGrid = false;
+  let tone = 'dark';
+  let lastCoords = 0;
   let raf = 0;
   let seen = false;
 
@@ -39,7 +41,11 @@ export function initCursor() {
     pos.x += (target.x - pos.x) * k;
     pos.y += (target.y - pos.y) * k;
     el.style.transform = `translate3d(${pos.x.toFixed(1)}px, ${pos.y.toFixed(1)}px, 0)`;
-    if (onGrid && state === 'cross') coords.textContent = `X ${pad(target.x + scrollX)}  Y ${pad(target.y + scrollY)}`;
+    const now = performance.now();
+    if (onGrid && state === 'cross' && now - lastCoords > 100) {
+      lastCoords = now;
+      coords.textContent = `X ${pad(target.x + scrollX)}  Y ${pad(target.y + scrollY)}`;
+    }
     if (Math.abs(target.x - pos.x) > 0.2 || Math.abs(target.y - pos.y) > 0.2) raf = requestAnimationFrame(loop);
   };
   const kick = () => {
@@ -72,6 +78,12 @@ export function initCursor() {
     if (e.pointerType !== 'mouse') return;
     const node = e.target as Element;
     setState(classify(node));
+    const toned = node.closest?.('.theme-cream, .theme-dark, .theme-indigo');
+    const nextTone = toned?.classList.contains('theme-cream') ? 'cream' : 'dark';
+    if (nextTone !== tone) {
+      tone = nextTone;
+      el.dataset.tone = tone;
+    }
     const grid = !!node.closest?.('.blueprint-grid');
     if (grid !== onGrid) {
       onGrid = grid;

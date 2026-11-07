@@ -46,7 +46,6 @@
   z-index: var(--z-cursor);
   pointer-events: none;
   color: var(--c-cream);
-  mix-blend-mode: difference;
   opacity: 0;
   transition: opacity 0.2s linear;
 }
@@ -82,11 +81,11 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--c-cream);
+  background: currentColor;
 }
 
-.cursor[data-state='view'] {
-  mix-blend-mode: normal;
+.cursor[data-tone='cream'] {
+  color: var(--c-ink);
 }
 
 .cursor[data-state='view'] .cursor__shape {

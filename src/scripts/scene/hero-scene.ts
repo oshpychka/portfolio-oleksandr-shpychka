@@ -6,7 +6,7 @@ import {
   DynamicDrawUsage,
   InstancedMesh,
   Matrix4,
-  MeshPhysicalMaterial,
+  MeshStandardMaterial,
   PMREMGenerator,
   PerspectiveCamera,
   Plane,
@@ -53,7 +53,7 @@ function seeded(seed: number) {
 
 export function createHeroScene({ container, area: areaEl, interactive, onCollide, onSlow }: SceneOptions) {
   const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -80,7 +80,7 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
   camera.position.set(0, 0, 22);
 
   const parts = makeParts();
-  const material = new MeshPhysicalMaterial({ roughness: 0.26, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, side: DoubleSide });
+  const material = new MeshStandardMaterial({ roughness: 0.22, metalness: 0.05, side: DoubleSide });
 
   const desktop = window.matchMedia('(min-width: 861px)').matches;
   const mix = (desktop ? PART_MIX.desktop : PART_MIX.mobile).map((name) => Math.max(0, parts.findIndex((p) => p.name === name)));

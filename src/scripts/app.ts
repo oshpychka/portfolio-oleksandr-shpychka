@@ -21,25 +21,26 @@ type Cleanup = () => void;
 let cleanups: Cleanup[] = [];
 let generation = 0;
 
+const idle = (fn: () => void) =>
+  'requestIdleCallback' in window ? window.requestIdleCallback(fn, { timeout: 700 }) : window.setTimeout(fn, 120);
+
 export function mount() {
   unmount();
   const current = generation;
-  cleanups = [
-    initBoot(),
-    initSoundUI(),
-    initMenu(),
-    initCopy(),
-    initClocks(SITE.timeZone),
-    initScroll(),
-    initHeader(),
-    initCurves(),
-    initParallax(),
-    initHero(),
-    initPreview(),
-    initStack(),
-    initCursor(),
-    initBlueprint(),
-  ];
+  cleanups = [initBoot(), initSoundUI(), initMenu(), initScroll(), initHeader(), initHero()];
+  idle(() => {
+    if (current !== generation) return;
+    cleanups.push(
+      initCurves(),
+      initParallax(),
+      initCopy(),
+      initClocks(SITE.timeZone),
+      initPreview(),
+      initStack(),
+      initCursor(),
+      initBlueprint(),
+    );
+  });
   const fonts = document.fonts?.ready ?? Promise.resolve();
   Promise.all([fonts, whenEntered()]).then(() => {
     if (current === generation) cleanups.push(initReveal(), initLine());

@@ -6,6 +6,7 @@ export default defineConfig({
   site: SITE_URL,
   trailingSlash: 'never',
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
+  build: { inlineStylesheets: 'always' },
   integrations: [sitemap()],
   vite: { build: { chunkSizeWarningLimit: 700 } },
   image: {

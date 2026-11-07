@@ -132,9 +132,18 @@ export function initPreview() {
     if (images.has(src)) return;
     const img = new Image();
     img.decoding = 'async';
-    img.src = src;
     images.set(src, img);
   });
+  const loadImages = () => images.forEach((img, src) => {
+    if (!img.src) img.src = src;
+  });
+  const near = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      loadImages();
+      near.disconnect();
+    }
+  }, { rootMargin: '600px 0px' });
+  near.observe(list);
 
   const el = document.createElement('div');
   el.className = 'preview';
@@ -145,12 +154,17 @@ export function initPreview() {
   const fallback = el.querySelector<HTMLImageElement>('.preview__img')!;
 
   let gl: ReturnType<typeof createGL> = null;
-  try {
-    gl = createGL(canvas);
-  } catch {
-    gl = null;
-  }
-  el.classList.toggle('preview--gl', !!gl);
+  let glTried = false;
+  const ensureGL = () => {
+    if (glTried) return;
+    glTried = true;
+    try {
+      gl = createGL(canvas);
+    } catch {
+      gl = null;
+    }
+    el.classList.toggle('preview--gl', !!gl);
+  };
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pos = { x: innerWidth / 2, y: innerHeight / 2 };
@@ -210,6 +224,7 @@ export function initPreview() {
   const onOver = (e: PointerEvent) => {
     const row = (e.target as Element).closest<HTMLAnchorElement>('[data-preview]');
     if (!row) return;
+    ensureGL();
     show(row);
     if (!active) {
       active = true;
@@ -231,6 +246,7 @@ export function initPreview() {
   window.addEventListener('pointermove', onMove, { passive: true });
 
   return () => {
+    near.disconnect();
     cancelAnimationFrame(raf);
     gsap.killTweensOf(state);
     list.removeEventListener('pointerover', onOver);

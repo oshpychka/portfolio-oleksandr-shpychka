@@ -186,7 +186,7 @@ Frontend / WordPress Developer
 - Built web apps with React and Next.js.
 
 **Jan 2025 — Nov 2026 · Consultant LM LLC**
-WordPress Developer
+Frontend / WordPress Developer
 - Built WordPress sites and custom websites for clients.
 - Connected online payments.
 - Developed custom WordPress plugins.
@@ -246,7 +246,6 @@ usually replies within a day
 
 ## Открытые TODO
 
-- Должность в Consultant LM LLC: указано `WordPress Developer`, нужно подтверждение.
 
 - PDF резюме: `public/cv/Oleksandr-Shpychka-CV.pdf`.
 - Ссылки на Bato, CodePen и коммерческие проекты — позже, по решению владельца.
