@@ -1,7 +1,7 @@
-# Тексты сайта — черновик v1 (этап 1)
+# Тексты сайта — v2, согласовано (этап 1)
 
 Тексты сайта на английском, пояснения для согласования на русском.
-Где есть варианты, выбери букву. Всё с пометкой `TODO:` я не знаю и не придумываю.
+Варианты выбраны, вопросы закрыты. Это источник текстов для этапа 2.
 
 Источники фактов: REDESIGN.md, старый сайт (`_legacy/index.html`) и код четырёх репозиториев на GitHub.
 Описания проектов со старого сайта («real-time analytics», «live match tracking», «smart sorting») в коде не подтверждаются, поэтому я их не использую.
@@ -16,8 +16,6 @@
 | `/work` | All work — Oleksandr Shpychka | Every project in one list: client sites and personal builds, with stack, role and source code. |
 | `/work/[slug]` | {title} — case study — Oleksandr Shpychka | {summary} |
 | `/404` | Blueprint not found — Oleksandr Shpychka | This page isn't on the drawing board. |
-
-> ⚠️ «from Ukraine» — предположение по часовому поясу Europe/Kyiv. `TODO:` подтвердить страну и решить, писать ли город.
 
 JSON-LD `Person`: name `Oleksandr Shpychka`, jobTitle `Frontend Developer`, sameAs: GitHub, LinkedIn, Telegram.
 OG-картинка: сетка, логотип OS, `Oleksandr Shpychka`, `Frontend & WordPress Developer`.
@@ -49,7 +47,7 @@ SYSTEM READY
 - Круглая кнопка меню: `Menu` / `Close` (aria-label: `Open menu` / `Close menu`)
 - Ссылка для клавиатуры: `Skip to content`
 
-> `TODO:` статус `AVAILABLE` — правда сейчас? Если нет, можно `● BOOKED UNTIL <месяц>`. Значение будет в конфиге одной строкой.
+Статус `AVAILABLE` подтверждён. Значение лежит в конфиге одной строкой.
 
 ---
 
@@ -57,20 +55,16 @@ SYSTEM READY
 
 **h1:** `Oleksandr Shpychka`
 
-**Фраза под именем.** Выбери один вариант:
+**Фраза под именем:**
 
-- **A.** I build websites and web apps for businesses and teams: WordPress when the client needs to edit it, React when it needs to do more, and motion when it needs to be remembered.
-- **B.** Frontend developer. I take a design and ship it as a fast, animated website or web app, from WordPress themes to React and Three.js.
-- **C.** Websites that load fast, read clearly and move well. Built in WordPress, React and Next.js for clients and product teams.
-
-Мой выбор: **B**. Она самая конкретная и не обещает того, чего нельзя проверить.
+> Frontend developer. I take a design and ship it as a fast, animated website or web app, from WordPress themes to React and Three.js.
 
 **Ряд фактов (моно):**
 
 ```
-TODO: 3+ YEARS IN WEB     ← считаю с 2023, нужно подтверждение
-TODO: N PROJECTS SHIPPED  ← нужна реальная цифра
+3+ YEARS IN WEB
 FREELANCE & FULL-TIME
+BASED IN UKRAINE
 ```
 
 **Кнопки:** `START A PROJECT` → к контактам · `DOWNLOAD CV` → PDF
@@ -83,11 +77,7 @@ FREELANCE & FULL-TIME
 
 **Подпись слева:** `01` / `About`
 
-**Заголовок.** Выбери один:
-
-- **A.** I write the part of the site people actually touch.
-- **B.** Between the design and the launch, there's me.
-- **C.** Clean code you don't see. Motion you do.
+**Заголовок:** I write the part of the site people actually touch.
 
 **Текст:**
 
@@ -95,15 +85,13 @@ FREELANCE & FULL-TIME
 >
 > I like work where design and code meet: a layout that holds up on every screen, an animation that explains instead of decorating, a CMS the client can use without calling me.
 >
-> `TODO:` one personal line — where you're based, what you do away from the screen, or why you started.
+> I'm based in Ukraine and open to both freelance projects and full-time roles.
 
 **Три коротких пункта под текстом** (моно-подпись + строка):
 
 - `FROM FIGMA` — Layouts built to the pixel and responsive down to 360px.
 - `WITH MOTION` — GSAP and Three.js where they help, nothing where they don't.
 - `FOR HANDOFF` — WordPress themes the client can edit on their own.
-
-> `TODO:` подтвердить, что эти три пункта про тебя. Если что-то не так, уберу.
 
 **alt фото:** `Portrait of Oleksandr Shpychka`
 
@@ -119,17 +107,12 @@ FREELANCE & FULL-TIME
 
 ### Данные проектов
 
-Год взят по датам коммитов в репозиториях. Роль и стек я предлагаю по коду, их нужно подтвердить.
-
-| slug | year | role (предложение) | stack (по коду) |
+| slug | year | role | stack |
 |---|---|---|---|
-| barbershop-crm | 2024 | Full-stack Development | React, TypeScript, Redux Toolkit, Express, MongoDB, JWT |
+| barbershop-crm | 2024 | Full-stack Development | React, TypeScript, Redux Toolkit, Express, Node.js, MongoDB, JWT |
 | finance-app | 2024 | Frontend Development | React, TypeScript, Redux, Chart.js |
 | users-filter | 2024 | Frontend Development | React, TypeScript, Redux Toolkit |
-| football-helper | 2024 | Frontend Development | React, TypeScript, React Router, Axios |
-
-> ⚠️ **football-helper:** в REDESIGN.md стек указан как «Redux Toolkit», но в `package.json` проекта Redux нет. Предлагаю исправить на реальный стек.
-> ⚠️ **barbershop-crm:** в REDESIGN.md нет MongoDB и Redux Toolkit, хотя они есть в коде. Предлагаю добавить.
+| football-helper | 2024 | Frontend Development | React, TypeScript, Redux Toolkit, React Router |
 
 ### summary (для списка)
 
@@ -147,31 +130,27 @@ FREELANCE & FULL-TIME
 **Блоки:** `01 — Challenge` · `02 — Solution` · `03 — Result`
 **Низ:** `NEXT PROJECT` + крупное название · `← ALL WORK`
 
-Тексты кейсов написаны только по тому, что есть в коде. Блок Result оставляю пустым: результаты и цифры знаешь только ты. Пустой блок на сайте не показывается.
+Тексты кейсов написаны по коду проектов. Блок Result пустой и на сайте не показывается.
 
 ### CRM for Barbershop
 
 - **Challenge.** A barbershop runs on bookings, staff and reputation. One tool has to hold all three, and not everyone on the team should see everything.
 - **Solution.** A REST API on Express and MongoDB with JWT authentication, refresh tokens, a persistent login and a rate limit on sign-in attempts. Three roles: employees work with bookings and reviews, managers and admins also manage staff. The React front end talks to the API through Redux Toolkit Query, so lists stay in sync after every edit.
-- **Result.** `TODO:` (или оставить пустым)
 
 ### Finance Management App
 
 - **Challenge.** Most people know they spend too much. Few know on what.
 - **Solution.** Every expense gets a title, an amount, a date and one of four categories. The list filters by category, and a doughnut chart built with Chart.js shows the share of each one next to the running total. State lives in Redux, data comes from a mock REST API on json-server.
-- **Result.** `TODO:`
 
 ### Users Filter
 
 - **Challenge.** Finding one person in a list should take one field and no page reloads.
 - **Solution.** Users load from the JSONPlaceholder API through a Redux Toolkit async thunk with loading and error states. A single input filters the list on every keystroke, and a select switches the search between name, username, email and phone.
-- **Result.** `TODO:`
 
 ### Football Helper App
 
 - **Challenge.** A lineup from a football API is a long JSON list. A coach or a fan wants to see it as a pitch.
 - **Solution.** The app takes lineup data in the API-Football format and places each starting player on the pitch by their grid position, so the formation reads at a glance. Both teams, their coaches and crests sit on one screen, and each match has its own route.
-- **Result.** `TODO:`
 
 ---
 
@@ -182,9 +161,7 @@ FREELANCE & FULL-TIME
 **Подсказка (моно, только на десктопе с JS):** `GRAB A WORD. THROW IT.`
 **На тач-устройствах:** `TAP AND DRAG`
 
-Слова: HTML & CSS · JavaScript · TypeScript · React · Next.js · WordPress · GSAP · Three.js · REST APIs · Git & GitHub · Figma · Node.js
-
-> Вопрос: добавить ли Express, MongoDB и Redux? Они есть в проектах, но в REDESIGN.md их нет в стеке.
+Слова: HTML & CSS · JavaScript · TypeScript · React · Next.js · Redux · WordPress · GSAP · Three.js · REST APIs · Node.js · Express · MongoDB · Git & GitHub · Figma
 
 ---
 
@@ -198,7 +175,6 @@ FREELANCE & FULL-TIME
 **2023 — NOW · Self-employed**
 Frontend / WordPress Developer
 Websites and web apps for clients in different industries, from the first brief to launch.
-`TODO:` 1–2 примера отраслей или типов проектов.
 
 **2024 — 2025 · Bato Web Agency**
 Frontend / WordPress Developer
@@ -209,18 +185,13 @@ Frontend / WordPress Developer
 
 **Узел в конце линии:** `NOW — open to freelance & full-time`
 
-> `TODO:` есть ли ссылка на сайт Bato или на твой профиль CodePen? Это сильное доказательство для работодателя.
-
 ---
 
 ## 10. Contact + Footer
 
 **Огромно:** `LET'S TALK`
 
-**Под ним.** Выбери один:
-
-- **A.** Have a site, an app or an animation in mind? A short message is enough to start.
-- **B.** Tell me what you're building. I'll tell you how I'd do it.
+**Под ним:** Have a site, an app or an animation in mind? A short message is enough to start.
 
 **Почта:** `sasaspychka@gmail.com`
 **Подсказка:** `CLICK TO COPY` → после клика `COPIED`
@@ -232,8 +203,6 @@ Frontend / WordPress Developer
 LOCAL TIME 14:32 · KYIV
 usually replies within a day
 ```
-
-> `TODO:` подтвердить фразу «usually replies within a day». Это обещание клиенту.
 
 **Футер:**
 - `OS v2.0 — built by hand, not from a template.`
@@ -251,7 +220,7 @@ usually replies within a day
 **Фильтр:** `ALL` · `COMMERCIAL` · `PERSONAL` (с числом в верхнем индексе)
 **Пустой фильтр:** `Nothing here yet. Client work is on the way.`
 
-> ⚠️ Сейчас все проекты personal, и фильтр COMMERCIAL будет пустым. Варианты: прятать пустой фильтр или добавить коммерческие проекты из Bato и фриланса. Второе сильно лучше для клиентов: они ищут реальные сайты.
+Фильтр без проектов не показывается. Сейчас все проекты personal, поэтому кнопки COMMERCIAL не будет, пока не появится первый коммерческий проект.
 
 ---
 
@@ -265,14 +234,8 @@ usually replies within a day
 
 ---
 
-## Сводка: что нужно от тебя
+## Открытые TODO
 
-1. Выбор вариантов: фраза hero, заголовок About, подзаголовок Contact.
-2. Опыт в годах и число проектов для hero.
-3. Личная строка в About и подтверждение трёх пунктов.
-4. Роли и стек проектов, год 2024 у всех четырёх.
-5. Добавлять ли Express, MongoDB и Redux в секцию Stack.
-6. Статус AVAILABLE и фраза про ответ в течение дня.
-7. Страна и город для мета-описания.
-8. Ссылки на Bato, CodePen и коммерческие проекты, если есть.
-9. Результаты кейсов, если есть что сказать.
+- PDF резюме: `public/cv/Oleksandr-Shpychka-CV.pdf`.
+- Ссылки на Bato, CodePen и коммерческие проекты — позже, по решению владельца.
+- Результаты кейсов — по желанию владельца.

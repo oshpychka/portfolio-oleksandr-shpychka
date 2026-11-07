@@ -194,12 +194,12 @@ PDF резюме хранится в проекте: `public/cv/Oleksandr-Shpych
 
 | slug | title | stack | codeUrl |
 |---|---|---|---|
-| `barbershop-crm` | CRM for Barbershop | React, TypeScript, Express, Node.js | https://github.com/oshpychka/CRM-for-barbershop |
+| `barbershop-crm` | CRM for Barbershop | React, TypeScript, Redux Toolkit, Express, Node.js, MongoDB, JWT | https://github.com/oshpychka/CRM-for-barbershop |
 | `finance-app` | Finance Management App | React, TypeScript, Redux, Chart.js | https://github.com/oshpychka/finance-management-app |
 | `users-filter` | Users Filter | React, TypeScript, Redux Toolkit | https://github.com/oshpychka/users-filter |
-| `football-helper` | Football Helper App | React, TypeScript, Redux Toolkit | https://github.com/oshpychka/trainee-football-app-project |
+| `football-helper` | Football Helper App | React, TypeScript, Redux Toolkit, React Router | https://github.com/oshpychka/trainee-football-app-project |
 
-Все четыре — `type: 'personal'`, `liveUrl` пока нет. Год и роль — `TODO:`.
+Все четыре — `type: 'personal'`, `liveUrl` пока нет. Год, роль и тексты согласованы на этапе 1, см. `docs/copy.md`.
 
 ---
 
