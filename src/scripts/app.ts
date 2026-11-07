@@ -10,6 +10,7 @@ import { initCopy } from './copy';
 import { initClocks } from './clock';
 import { initBoot, whenEntered } from './boot';
 import { initSoundUI } from './sound-ui';
+import { initHero } from './hero';
 
 type Cleanup = () => void;
 
@@ -29,6 +30,7 @@ export function mount() {
     initHeader(),
     initCurves(),
     initParallax(),
+    initHero(),
   ];
   const fonts = document.fonts?.ready ?? Promise.resolve();
   Promise.all([fonts, whenEntered()]).then(() => {

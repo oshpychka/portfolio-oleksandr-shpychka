@@ -19,6 +19,7 @@
 - `src/data/content.ts` — тексты главной (hero, about, stack, experience, contact, мета). Согласованная версия — `docs/copy.md`.
 - `src/config/site.ts` — адрес сайта, контакты, статус AVAILABLE/BUSY.
 - `tools/covers/`, `tools/og/` — генераторы обложек проектов, OG-картинки и иконок (`render.sh`, нужен Google Chrome).
+- `tools/scene/capture.mjs` — снимает статичный кадр 3D-сцены в `src/assets/hero/scene.png` с запущенного сайта: `node tools/scene/capture.mjs http://localhost:4321`.
 - `src/assets/projects/<slug>/` — картинки проектов.
 - `public/cv/` — PDF резюме.
 

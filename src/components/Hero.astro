@@ -4,9 +4,12 @@ import { hero } from '../data/content';
 import { SITE } from '../config/site';
 import { cvAvailable } from '../lib/cv';
 import { logo, LOGO_BOX } from '../data/logo';
+import { Image } from 'astro:assets';
+import sceneStill from '../assets/hero/scene.png';
 ---
 
 <section class="hero theme-dark blueprint-grid" aria-labelledby="hero-title" data-line-hero>
+  <div class="hero__scene" data-hero-scene aria-hidden="true"></div>
   <div class="container hero__inner">
     <div class="hero__sys mono mono-s muted" aria-hidden="true">
       <span data-scramble>// OS v{SITE.version}</span>
@@ -18,6 +21,10 @@ import { logo, LOGO_BOX } from '../data/logo';
       <svg viewBox={`${LOGO_BOX.x} ${LOGO_BOX.y} ${LOGO_BOX.width} ${LOGO_BOX.height}`} fill="none" overflow="visible">
         <path d={logo.letters} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
       </svg>
+    </div>
+
+    <div class="hero__stage" data-scene-area aria-hidden="true">
+      <Image class="hero__still" src={sceneStill} alt="" widths={[420, 640, 900, 1178]} sizes="(min-width: 861px) 42vw, 100vw" loading="lazy" decoding="async" />
     </div>
 
     <h1 class="hero__title" id="hero-title">{SITE.firstName}<br /> Shpychka</h1>
@@ -58,10 +65,49 @@ import { logo, LOGO_BOX } from '../data/logo';
     padding-bottom: 32px;
   }
 
+  .hero__scene {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .hero__scene :global(canvas) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero__stage {
+    position: absolute;
+    top: 38%;
+    right: var(--gutter);
+    width: 33%;
+    height: 30%;
+    pointer-events: none;
+  }
+
+  .hero__stage :global(.hero__still) {
+    display: none;
+    position: absolute;
+    left: -12%;
+    top: -30%;
+    width: 124%;
+    height: 160%;
+    max-width: none;
+    object-fit: contain;
+  }
+
+  :global(.no-js) .hero__stage :global(.hero__still),
+  :global(.scene-static) .hero__stage :global(.hero__still) {
+    display: block;
+  }
+
   .hero__logo {
     position: absolute;
     top: clamp(132px, 15vh, 180px);
-    right: var(--gutter);
+    right: calc(var(--gutter) + clamp(36px, 5vw, 88px));
     width: clamp(132px, 27vw, 440px);
     aspect-ratio: 182 / 80;
     color: var(--c-cream);
@@ -129,7 +175,21 @@ import { logo, LOGO_BOX } from '../data/logo';
   @media (max-width: 640px) {
     .hero__logo {
       top: 168px;
-      width: 38vw;
+      right: calc(var(--gutter) + 28px);
+      width: 36vw;
+    }
+
+    .hero__inner {
+      grid-template-rows: auto minmax(200px, 1fr) auto auto auto;
+    }
+
+    .hero__stage {
+      position: relative;
+      inset: auto;
+      width: auto;
+      height: auto;
+      min-height: 170px;
+      margin-top: 64px;
     }
 
     .hide-s {
