@@ -45,3 +45,11 @@ export const logoMark = {
   d: logo.letters,
   viewBox: `${LOGO_BOX.x - 6} ${LOGO_BOX.y - 6} ${LOGO_BOX.width + 12} ${LOGO_BOX.height + 12}`,
 };
+
+export const LOGO_PIECES = [
+  'M50 100 L74 100 Q90 100 90 84 L90 36 Q90 20 74 20 L50 20',
+  'M50 20 L26 20 Q10 20 10 36 L10 84 Q10 100 26 100 L50 100',
+  'M50 100 L120 100',
+  'M120 100 L176 100 Q192 100 192 84 L192 76 Q192 60 176 60 L136 60',
+  'M136 60 Q120 60 120 44 L120 36 Q120 20 136 20 L192 20',
+];

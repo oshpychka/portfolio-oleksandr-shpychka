@@ -8,7 +8,13 @@ import { stack } from '../data/content';
   <div class="container section-grid">
     <SectionHead index={3} label="Stack" />
     <div class="stack__content">
-      <h2 class="section-title" id="stack-title" data-reveal="lines">Stack</h2>
+      <div class="stack__head">
+        <h2 class="section-title" id="stack-title" data-reveal="lines">Stack</h2>
+        <p class="stack__hint mono mono-s muted" data-physics-hint hidden>
+          <span class="stack__hint-fine">Grab a word. Throw it.</span>
+          <span class="stack__hint-touch">Tap and drag</span>
+        </p>
+      </div>
       <ul role="list" class="stack__words" data-physics-area>
         {stack.map((word) => <li class="stack__word" data-physics-body>{word}</li>)}
       </ul>
@@ -21,6 +27,56 @@ import { stack } from '../data/content';
   .stack__content {
     display: grid;
     gap: clamp(40px, 6vw, 72px);
+  }
+
+  .stack__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .stack__hint[hidden] {
+    display: none;
+  }
+
+  .stack__hint-touch {
+    display: none;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .stack__hint-fine {
+      display: none;
+    }
+
+    .stack__hint-touch {
+      display: inline;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js) .stack__words {
+      position: relative;
+      height: clamp(380px, 56vh, 560px);
+      align-content: flex-start;
+      border-bottom: 1px solid var(--rule);
+    }
+  }
+
+  .stack__words.is-physics {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .stack__words.is-physics .stack__word {
+    cursor: grab;
+    user-select: none;
+  }
+
+  .stack__words.is-grabbing,
+  .stack__words.is-grabbing .stack__word {
+    cursor: grabbing;
   }
 
   .stack__words {

@@ -2,16 +2,37 @@
 import Base from '../layouts/Base.astro';
 import { meta } from '../data/content';
 import { SITE } from '../config/site';
+import { logo, LOGO_PIECES } from '../data/logo';
 ---
 
 <Base title={meta.notFound.title} description={meta.notFound.description} noindex>
   <section class="nf theme-dark blueprint-grid" aria-labelledby="nf-title">
     <div class="container nf__inner">
       <p class="mono mono-s muted" data-scramble>Error 404 · OS v{SITE.version}</p>
-      <div class="nf__body">
-        <h1 id="nf-title" data-reveal="lines">Blueprint not found</h1>
-        <p class="nf__text">This page fell off the drawing board. Put the modules back in place, or skip the puzzle.</p>
-        <a class="btn btn--primary" href="/">Back home</a>
+      <div class="nf__grid">
+        <div class="nf__body">
+          <h1 id="nf-title" data-reveal="lines">Blueprint not found</h1>
+          <p class="nf__text">This page fell off the drawing board. Put the modules back in place, or skip the puzzle.</p>
+          <p class="nf__hint mono mono-s muted" data-game-hint hidden>Drag the pieces into the outline · or press Enter on each one</p>
+          <div class="nf__actions">
+            <a class="btn btn--primary" href="/">Back home</a>
+          </div>
+          <p class="nf__status mono" role="status" aria-live="polite" data-game-status></p>
+          <div class="nf__done" data-game-done hidden>
+            <button class="btn" type="button" data-game-restart>Break it again</button>
+          </div>
+        </div>
+        <div class="nf__board">
+          <svg class="game" viewBox="-190 -150 572 380" data-game aria-label="Puzzle: assemble the OS logo">
+            <path class="game__ghost" d={logo.letters} />
+            {LOGO_PIECES.map((d, i) => (
+              <g class="game__piece" data-piece tabindex="0" role="button" aria-pressed="false" aria-label={`Piece ${i + 1} of ${LOGO_PIECES.length}. Press Enter to put it in place.`}>
+                <path class="game__hit" d={d} />
+                <path class="game__stroke" d={d} />
+              </g>
+            ))}
+          </svg>
+        </div>
       </div>
       <div class="mark-row" aria-hidden="true"><span class="plus"></span><span class="plus"></span></div>
     </div>
@@ -28,10 +49,15 @@ import { SITE } from '../config/site';
     padding-bottom: 32px;
   }
 
-  .nf__body {
-    align-self: center;
+  .nf__grid {
     display: grid;
-    gap: 28px;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .nf__body {
+    display: grid;
+    gap: 24px;
     justify-items: start;
   }
 
@@ -44,4 +70,96 @@ import { SITE } from '../config/site';
     max-width: 36ch;
     color: var(--muted);
   }
+
+  .nf__hint[hidden],
+  .nf__done[hidden] {
+    display: none;
+  }
+
+  .nf__status {
+    min-height: 1.4em;
+    color: var(--accent);
+  }
+
+  .game {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    touch-action: none;
+  }
+
+  .game__ghost {
+    fill: none;
+    stroke: rgba(247, 245, 240, 0.28);
+    stroke-width: 2;
+    stroke-dasharray: 4 6;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .game__hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 34;
+    stroke-linecap: round;
+    pointer-events: stroke;
+  }
+
+  .game__piece .game__stroke {
+    fill: none;
+    stroke: var(--c-cream);
+    stroke-width: 9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.3s linear;
+  }
+
+  .game__piece {
+    outline: none;
+  }
+
+  .game.is-live .game__piece:not(.is-placed) {
+    cursor: grab;
+  }
+
+  .game__piece.is-dragging {
+    cursor: grabbing;
+  }
+
+  .game__piece.is-near .game__stroke,
+  .game__piece:focus-visible .game__stroke {
+    stroke: var(--c-blue);
+  }
+
+  .game__piece.is-placed .game__stroke {
+    stroke: var(--c-blue);
+  }
+
+  .game.is-assembled .game__piece .game__stroke {
+    stroke: var(--c-cream);
+  }
+
+  .game.is-assembled .game__ghost {
+    opacity: 0;
+    transition: opacity 0.6s linear;
+  }
+
+  @media (min-width: 960px) {
+    .nf__grid {
+      grid-template-columns: 5fr 7fr;
+    }
+  }
 </style>
+
+<script>
+  import { initGame } from '../scripts/game';
+
+  let cleanup: (() => void) | null = null;
+  document.addEventListener('astro:page-load', () => {
+    cleanup?.();
+    cleanup = document.querySelector('[data-game]') ? initGame() : null;
+  });
+  document.addEventListener('astro:before-swap', () => {
+    cleanup?.();
+    cleanup = null;
+  });
+</script>

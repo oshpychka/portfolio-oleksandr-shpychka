@@ -1,0 +1,128 @@
+@media (hover: hover) and (pointer: fine) {
+  .has-cursor,
+  .has-cursor body,
+  .has-cursor a,
+  .has-cursor button,
+  .has-cursor label {
+    cursor: none;
+  }
+
+  .has-cursor :is(p, h1, h2, h3, h4, dd, dt, .exp__points li) {
+    cursor: text;
+  }
+
+  .has-cursor :is(input, textarea, select) {
+    cursor: auto;
+  }
+
+  .has-cursor .stack__words.is-physics .stack__word {
+    cursor: grab;
+  }
+
+  .has-cursor .stack__words.is-grabbing,
+  .has-cursor .stack__words.is-grabbing .stack__word {
+    cursor: grabbing;
+  }
+
+  .has-cursor .boot,
+  .has-cursor .boot button,
+  .has-cursor .site-menu,
+  .has-cursor .site-menu a,
+  .has-cursor .site-menu button {
+    cursor: auto;
+  }
+
+  .has-cursor .boot button,
+  .has-cursor .site-menu a,
+  .has-cursor .site-menu button {
+    cursor: pointer;
+  }
+}
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-cursor);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s linear;
+}
+
+.cursor.is-visible {
+  opacity: 1;
+}
+
+.cursor__shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  translate: -50% -50%;
+  color: var(--c-cream);
+  mix-blend-mode: difference;
+  background:
+    linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat,
+    linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat;
+  border-radius: 0;
+  transition:
+    width 0.3s var(--ease-out),
+    height 0.3s var(--ease-out),
+    border-radius 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out),
+    scale 0.2s var(--ease-out);
+}
+
+.cursor.is-down .cursor__shape {
+  scale: 0.8;
+}
+
+.cursor[data-state='dot'] .cursor__shape {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c-cream);
+}
+
+.cursor[data-state='view'] .cursor__shape {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--c-blue);
+  mix-blend-mode: normal;
+}
+
+.cursor[data-state='hidden'] .cursor__shape {
+  scale: 0;
+}
+
+.cursor__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  translate: -50% -50%;
+  color: var(--c-ink);
+  opacity: 0;
+  transition: opacity 0.2s linear;
+}
+
+.cursor[data-state='view'] .cursor__label {
+  opacity: 1;
+}
+
+.cursor__coords {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 10px;
+  white-space: pre;
+  color: var(--c-cream);
+  mix-blend-mode: difference;
+  opacity: 0;
+  transition: opacity 0.2s linear;
+}
+
+.cursor.is-grid[data-state='cross'] .cursor__coords {
+  opacity: 0.8;
+}

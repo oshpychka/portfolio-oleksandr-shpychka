@@ -19,6 +19,7 @@ const year = new Date().getFullYear();
   <div class="site-footer__bar mono mono-s">
     <p>{contact.footer}</p>
     <p class="muted">© {year} {SITE.name}</p>
+    <button class="site-footer__bp mono mono-s" type="button" aria-pressed="false" data-blueprint-toggle hidden>Blueprint mode</button>
     <a href="#top">Back to top ↑</a>
   </div>
 </footer>
@@ -59,5 +60,20 @@ const year = new Date().getFullYear();
 
   .site-footer__bar a {
     padding: 4px 0;
+  }
+
+  .site-footer__bp {
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  }
+
+  .site-footer__bp[hidden] {
+    display: none;
+  }
+
+  .site-footer__bp[aria-pressed='true'] {
+    color: var(--accent);
   }
 </style>

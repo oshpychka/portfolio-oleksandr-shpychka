@@ -12,6 +12,9 @@ import { initBoot, whenEntered } from './boot';
 import { initSoundUI } from './sound-ui';
 import { initHero } from './hero';
 import { initPreview } from './preview';
+import { initStack } from './stack';
+import { initCursor } from './cursor';
+import { initBlueprint } from './blueprint';
 
 type Cleanup = () => void;
 
@@ -33,6 +36,9 @@ export function mount() {
     initParallax(),
     initHero(),
     initPreview(),
+    initStack(),
+    initCursor(),
+    initBlueprint(),
   ];
   const fonts = document.fonts?.ready ?? Promise.resolve();
   Promise.all([fonts, whenEntered()]).then(() => {
