@@ -1,5 +1,6 @@
 import Lenis from 'lenis';
 import { gsap, ScrollTrigger, MOTION } from './gsap';
+import { hasEntered } from './boot';
 
 let lenis: Lenis | null = null;
 
@@ -52,8 +53,12 @@ export function initScroll() {
       else lenis?.start();
     };
     document.addEventListener('menu:change', onMenu);
+    const onEnter = () => lenis?.start();
+    if (!hasEntered()) lenis.stop();
+    document.addEventListener('os:enter', onEnter);
 
     return () => {
+      document.removeEventListener('os:enter', onEnter);
       document.removeEventListener('menu:change', onMenu);
       gsap.ticker.remove(tick);
       lenis?.destroy();

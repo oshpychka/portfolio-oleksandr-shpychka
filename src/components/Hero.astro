@@ -20,7 +20,7 @@ import { logo, LOGO_BOX } from '../data/logo';
       </svg>
     </div>
 
-    <h1 class="hero__title" id="hero-title" data-reveal="lines">{SITE.firstName}<br /> Shpychka</h1>
+    <h1 class="hero__title" id="hero-title">{SITE.firstName}<br /> Shpychka</h1>
 
     <div class="hero__body">
       <p class="hero__line">{hero.line}</p>
@@ -72,7 +72,8 @@ import { logo, LOGO_BOX } from '../data/logo';
     height: 100%;
   }
 
-  :global(.has-line) .hero__logo svg {
+  :global(.has-line) .hero__logo svg,
+  :global(.is-booting) .hero__logo svg {
     visibility: hidden;
   }
 

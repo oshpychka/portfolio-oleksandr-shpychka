@@ -1,0 +1,246 @@
+---
+import { logoMark } from '../data/logo';
+import { SITE } from '../config/site';
+
+const arrow = ['....#..', '.....#.', '#######', '.....#.', '....#..'];
+const dots = arrow.flatMap((row, y) => [...row].map((c, x) => (c === '#' ? { x, y } : null)).filter(Boolean)) as { x: number; y: number }[];
+const blocks = Array.from({ length: 16 });
+---
+
+<template id="boot-template">
+  <div class="boot" role="dialog" aria-modal="true" aria-labelledby="boot-title" data-boot>
+    <div class="boot__veil"></div>
+    <div class="boot__panel">
+      <div class="boot__top">
+        <p class="boot__tag mono">
+          <span class="boot__code">&lt;system&gt;</span>
+          <span>OS v{SITE.version}</span>
+          <span class="boot__code">&lt;/system&gt;</span>
+        </p>
+        <span class="boot__mark" aria-hidden="true">
+          <svg viewBox={logoMark.viewBox} fill="none"><path d={logoMark.d} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" /></svg>
+        </span>
+      </div>
+      <div class="boot__body">
+        <div class="boot__console">
+          <div class="boot__row">
+            <span class="boot__arrow" aria-hidden="true">
+              <svg viewBox="-1 -1 9 7">{dots.map((d) => <circle cx={d.x + 0.5} cy={d.y + 0.5} r="0.36" />)}</svg>
+            </span>
+            <span class="boot__label mono" id="boot-title" data-boot-label>Booting OS v{SITE.version}…</span>
+            <span class="boot__pct mono" data-boot-pct>0%</span>
+          </div>
+          <div class="boot__blocks" aria-hidden="true">{blocks.map(() => <i></i>)}</div>
+          <p class="boot__status mono mono-s" aria-live="polite" data-boot-status>Loading type</p>
+        </div>
+        <div class="boot__entry" data-boot-entry hidden>
+          <button class="btn btn--primary boot__enter" type="button" data-boot-enter>[ Enter ]</button>
+          <button class="boot__mute mono mono-s" type="button" data-boot-mute>enter without sound</button>
+          <p class="boot__hint mono mono-s">Sound is quiet and can be turned off anytime.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script is:inline>
+  (function () {
+    var d = document.documentElement;
+    var tpl = document.getElementById('boot-template');
+    if (!tpl || !d.classList.contains('js') || window.__osBooted) return;
+    window.__osBooted = true;
+    var short = false;
+    try { short = sessionStorage.getItem('os-booted') === '1'; } catch (e) {}
+    var node = tpl.content.firstElementChild.cloneNode(true);
+    node.setAttribute('data-mode', short ? 'short' : 'full');
+    d.classList.add('is-booting');
+    tpl.after(node);
+  })();
+</script>
+
+<style is:global>
+  .is-booting,
+  .is-booting body {
+    overflow: hidden;
+  }
+
+  .boot {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-loader);
+    display: grid;
+    place-items: center;
+    padding: var(--gutter);
+    color: var(--c-cream);
+  }
+
+  .boot__veil {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.78);
+    background-image:
+      linear-gradient(to right, rgba(91, 140, 255, 0.16) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(91, 140, 255, 0.16) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    transition: background-color 0.8s linear;
+  }
+
+  .boot.is-ready .boot__veil {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .boot__panel {
+    position: relative;
+    width: min(680px, 100%);
+    background: var(--c-navy);
+    border: 1px solid rgba(247, 245, 240, 0.14);
+  }
+
+  .boot__top {
+    display: grid;
+    grid-template-columns: 1fr 64px;
+    min-height: 64px;
+    background: #1f2b3a;
+    border-bottom: 1px solid rgba(247, 245, 240, 0.14);
+  }
+
+  .boot__tag {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    font-size: var(--fs-mono-s);
+  }
+
+  .boot__code {
+    color: var(--c-blue);
+  }
+
+  .boot__mark {
+    display: grid;
+    place-items: center;
+    background: var(--c-blue);
+    color: var(--c-ink);
+  }
+
+  .boot__mark svg {
+    width: 36px;
+  }
+
+  .boot__body {
+    display: grid;
+    gap: 28px;
+    padding: clamp(28px, 6vw, 64px) clamp(16px, 5vw, 56px);
+  }
+
+  .boot__console {
+    display: grid;
+    gap: 10px;
+    padding: 8px;
+    background-image:
+      linear-gradient(to right, rgba(247, 245, 240, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(247, 245, 240, 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+    border: 1px solid rgba(247, 245, 240, 0.12);
+  }
+
+  .boot__row {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    min-height: 48px;
+    background: var(--c-cream);
+    color: var(--c-ink);
+  }
+
+  .boot__arrow {
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    background: var(--c-violet);
+  }
+
+  .boot__arrow svg {
+    width: 26px;
+    fill: #8fd4ff;
+  }
+
+  .boot__label {
+    padding-inline: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .boot__pct {
+    padding-right: 16px;
+    font-variant-numeric: tabular-nums;
+    min-width: 6ch;
+    text-align: right;
+  }
+
+  .boot__blocks {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 4px;
+    height: 40px;
+  }
+
+  .boot__blocks i {
+    background: var(--c-blue);
+    opacity: 0.08;
+    transition: opacity 0.2s linear;
+  }
+
+  .boot__blocks i.is-on {
+    opacity: 1;
+  }
+
+  .boot__status {
+    color: var(--c-muted-dark);
+    min-height: 1.4em;
+  }
+
+  .boot__entry {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .boot__entry[hidden] {
+    display: none;
+  }
+
+  .boot__enter {
+    min-width: 200px;
+    min-height: 56px;
+  }
+
+  .boot__mute {
+    padding: 8px 4px;
+    color: var(--c-cream);
+    text-transform: lowercase;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-color: rgba(247, 245, 240, 0.4);
+  }
+
+  .boot__mute:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .boot__hint {
+    color: var(--c-muted-dark);
+  }
+
+  @media (max-width: 480px) {
+    .boot__blocks {
+      height: 28px;
+      gap: 3px;
+    }
+
+    .boot__row {
+      grid-template-columns: 40px 1fr auto;
+    }
+  }
+</style>

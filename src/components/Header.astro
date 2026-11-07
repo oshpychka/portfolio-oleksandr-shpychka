@@ -1,5 +1,6 @@
 ---
 import Logo from './Logo.astro';
+import SoundToggle from './SoundToggle.astro';
 import { NAV, SITE } from '../config/site';
 import { cvAvailable } from '../lib/cv';
 
@@ -16,6 +17,7 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
         {NAV.map((item) => <li><a class="mono" href={item.href}>{item.label}</a></li>)}
       </ul>
     </nav>
+    <SoundToggle class="site-header__sound" />
     <p class="site-header__status mono" data-status={SITE.status}>
       <span class="dot" aria-hidden="true"></span>{statusLabel}
     </p>
@@ -42,6 +44,7 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
       </ol>
     </nav>
     <div class="site-menu__foot">
+      <SoundToggle class="site-menu__sound" />
       <a class="mono" href={`mailto:${SITE.email}`}>{SITE.email}</a>
       <ul role="list" class="site-menu__social">
         <li><a class="mono" href={SITE.links.telegram} rel="me noopener" target="_blank">Telegram ↗</a></li>
@@ -183,9 +186,23 @@ const statusLabel = SITE.status === 'available' ? 'Available' : 'Busy';
     display: none;
   }
 
+  .site-header__bar :global(.site-header__sound) {
+    margin-left: -8px;
+  }
+
+  .site-menu__foot :global(.site-menu__sound) {
+    justify-self: start;
+    margin-left: -6px;
+  }
+
   @media (max-width: 860px) {
     .site-header__status {
       display: none;
+    }
+
+    :global(.js) .site-header__bar :global(.site-header__sound) {
+      margin-left: auto;
+      margin-right: 64px;
     }
 
     .site-header__nav ul {

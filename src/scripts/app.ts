@@ -8,6 +8,8 @@ import { initLine } from './line';
 import { initMenu } from './menu';
 import { initCopy } from './copy';
 import { initClocks } from './clock';
+import { initBoot, whenEntered } from './boot';
+import { initSoundUI } from './sound-ui';
 
 type Cleanup = () => void;
 
@@ -18,6 +20,8 @@ export function mount() {
   unmount();
   const current = generation;
   cleanups = [
+    initBoot(),
+    initSoundUI(),
     initMenu(),
     initCopy(),
     initClocks(SITE.timeZone),
@@ -27,7 +31,7 @@ export function mount() {
     initParallax(),
   ];
   const fonts = document.fonts?.ready ?? Promise.resolve();
-  fonts.then(() => {
+  Promise.all([fonts, whenEntered()]).then(() => {
     if (current === generation) cleanups.push(initReveal(), initLine());
   });
 }

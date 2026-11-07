@@ -18,6 +18,7 @@ export function initCopy() {
       return;
     }
     label.textContent = 'Copied';
+    document.dispatchEvent(new CustomEvent('email:copied'));
     hint.setAttribute('data-copied', '');
     if (status) status.textContent = 'Email address copied to clipboard';
     window.clearTimeout(timer);

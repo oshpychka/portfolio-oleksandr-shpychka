@@ -6,6 +6,7 @@ import geistMonoLatin from '@fontsource-variable/geist-mono/files/geist-mono-lat
 import '../styles/global.css';
 import Seo from '../components/Seo.astro';
 import Header from '../components/Header.astro';
+import Boot from '../components/Boot.astro';
 
 interface Props {
   title: string;
@@ -46,6 +47,7 @@ const props = Astro.props;
     <slot name="head" />
   </head>
   <body class="theme-dark">
+    <Boot />
     <a class="skip-link mono" href="#main">Skip to content</a>
     <Header />
     <main id="main">
