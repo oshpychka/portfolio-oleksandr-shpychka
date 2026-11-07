@@ -35,3 +35,80 @@
 .link-u:hover {
   text-decoration-color: currentColor;
 }
+
+main section > .container,
+main article > header > .container,
+main article > section > .container {
+  position: relative;
+  z-index: 4;
+}
+
+.trace {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.trace__path {
+  fill: none;
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trace__path--hero {
+  stroke: var(--c-cream);
+  stroke-width: 2px;
+}
+
+.trace__path--dark {
+  stroke: rgba(247, 245, 240, 0.32);
+}
+
+.trace__path--cream {
+  stroke: var(--c-blue);
+}
+
+.trace__node {
+  stroke-width: 1.5px;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    fill 0.3s linear,
+    stroke 0.3s linear,
+    transform 0.45s var(--ease-out);
+}
+
+.trace__node--dark,
+.trace__node--hero {
+  fill: var(--c-black);
+  stroke: rgba(247, 245, 240, 0.6);
+}
+
+.trace__node--cream {
+  fill: var(--c-cream);
+  stroke: var(--c-blue);
+}
+
+.trace__node.is-lit {
+  fill: var(--c-blue);
+  stroke: var(--c-blue);
+  transform: scale(1.35);
+}
+
+@media (min-width: 861px) {
+  .trace__path {
+    stroke-width: 2px;
+  }
+
+  .trace__path--hero {
+    stroke-width: 2.5px;
+  }
+}
+
+main {
+  overflow-x: clip;
+}

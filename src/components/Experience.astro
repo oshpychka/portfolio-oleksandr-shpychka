@@ -9,7 +9,7 @@ import { experience, experienceEnd } from '../data/content';
     <SectionHead index={4} label="Experience" />
     <div class="exp__content">
       <h2 class="section-title" id="exp-title" data-reveal="lines">Experience</h2>
-      <ol role="list" class="exp__list">
+      <ol role="list" class="exp__list" data-timeline>
         {experience.map((job) => (
           <li class="exp__item" data-node>
             <p class="exp__years mono">
@@ -80,6 +80,23 @@ import { experience, experienceEnd } from '../data/content';
     border: 1px solid var(--fg);
     border-radius: 50%;
     background: var(--bg);
+  }
+
+  :global(.has-line) .exp__list::before {
+    display: none;
+  }
+
+  .exp__item::before {
+    transition:
+      background-color 0.3s linear,
+      border-color 0.3s linear,
+      transform 0.4s var(--ease-out);
+  }
+
+  .exp__item.is-lit::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.25);
   }
 
   .exp__item--end::before {

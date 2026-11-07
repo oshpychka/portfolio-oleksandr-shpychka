@@ -4,6 +4,7 @@ import { initHeader } from './header';
 import { initReveal } from './reveal';
 import { initParallax } from './parallax';
 import { initCurves } from './curves';
+import { initLine } from './line';
 import { initMenu } from './menu';
 import { initCopy } from './copy';
 import { initClocks } from './clock';
@@ -27,7 +28,7 @@ export function mount() {
   ];
   const fonts = document.fonts?.ready ?? Promise.resolve();
   fonts.then(() => {
-    if (current === generation) cleanups.push(initReveal());
+    if (current === generation) cleanups.push(initReveal(), initLine());
   });
 }
 

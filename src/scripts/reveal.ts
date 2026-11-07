@@ -28,7 +28,7 @@ export function initReveal() {
       );
     });
 
-    document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el) => {
+    document.querySelectorAll<HTMLElement>('[data-scramble]:not([data-scramble="node"])').forEach((el) => {
       const text = el.textContent ?? '';
       if (!text.trim()) return;
       gsap.to(el, {

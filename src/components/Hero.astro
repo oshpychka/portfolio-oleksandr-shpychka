@@ -3,14 +3,21 @@ import Curve from './Curve.astro';
 import { hero } from '../data/content';
 import { SITE } from '../config/site';
 import { cvAvailable } from '../lib/cv';
+import { logo, LOGO_BOX } from '../data/logo';
 ---
 
-<section class="hero theme-dark blueprint-grid" aria-labelledby="hero-title">
+<section class="hero theme-dark blueprint-grid" aria-labelledby="hero-title" data-line-hero>
   <div class="container hero__inner">
     <div class="hero__sys mono mono-s muted" aria-hidden="true">
       <span data-scramble>// OS v{SITE.version}</span>
       <span data-scramble>Status: {SITE.status === 'available' ? 'Available' : 'Busy'}</span>
       <span hidden data-clock-wrap>Sys.time <span data-clock></span> {SITE.city}</span>
+    </div>
+
+    <div class="hero__logo" data-logo-anchor aria-hidden="true">
+      <svg viewBox={`${LOGO_BOX.x} ${LOGO_BOX.y} ${LOGO_BOX.width} ${LOGO_BOX.height}`} fill="none" overflow="visible">
+        <path d={logo.letters} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+      </svg>
     </div>
 
     <h1 class="hero__title" id="hero-title" data-reveal="lines">{SITE.firstName}<br /> Shpychka</h1>
@@ -49,6 +56,24 @@ import { cvAvailable } from '../lib/cv';
     min-height: 100svh;
     padding-top: 120px;
     padding-bottom: 32px;
+  }
+
+  .hero__logo {
+    position: absolute;
+    top: clamp(132px, 15vh, 180px);
+    right: var(--gutter);
+    width: clamp(132px, 27vw, 440px);
+    aspect-ratio: 182 / 80;
+    color: var(--c-cream);
+  }
+
+  .hero__logo svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(.has-line) .hero__logo svg {
+    visibility: hidden;
   }
 
   .hero__sys {
@@ -101,6 +126,11 @@ import { cvAvailable } from '../lib/cv';
   }
 
   @media (max-width: 640px) {
+    .hero__logo {
+      top: 168px;
+      width: 38vw;
+    }
+
     .hide-s {
       display: none;
     }
