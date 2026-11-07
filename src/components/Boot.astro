@@ -76,10 +76,10 @@ const blocks = Array.from({ length: 16 });
   .boot__veil {
     position: absolute;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.78);
+    background-color: rgba(0, 0, 0, 0.8);
     background-image:
-      linear-gradient(to right, rgba(91, 140, 255, 0.16) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(91, 140, 255, 0.16) 1px, transparent 1px);
+      linear-gradient(to right, rgba(247, 245, 240, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(247, 245, 240, 0.07) 1px, transparent 1px);
     background-size: var(--grid-size) var(--grid-size);
     transition: background-color 0.8s linear;
   }
@@ -91,16 +91,16 @@ const blocks = Array.from({ length: 16 });
   .boot__panel {
     position: relative;
     width: min(680px, 100%);
-    background: var(--c-navy);
-    border: 1px solid rgba(247, 245, 240, 0.14);
+    background: var(--c-ink);
+    border: 1px solid rgba(247, 245, 240, 0.16);
   }
 
   .boot__top {
     display: grid;
     grid-template-columns: 1fr 64px;
     min-height: 64px;
-    background: #1f2b3a;
-    border-bottom: 1px solid rgba(247, 245, 240, 0.14);
+    background: var(--c-indigo);
+    border-bottom: 1px solid rgba(247, 245, 240, 0.16);
   }
 
   .boot__tag {
@@ -112,13 +112,13 @@ const blocks = Array.from({ length: 16 });
   }
 
   .boot__code {
-    color: var(--c-blue);
+    color: var(--c-muted-dark);
   }
 
   .boot__mark {
     display: grid;
     place-items: center;
-    background: var(--c-blue);
+    background: var(--c-cream);
     color: var(--c-ink);
   }
 
@@ -161,7 +161,7 @@ const blocks = Array.from({ length: 16 });
 
   .boot__arrow svg {
     width: 26px;
-    fill: #8fd4ff;
+    fill: var(--c-cream);
   }
 
   .boot__label {
@@ -186,13 +186,18 @@ const blocks = Array.from({ length: 16 });
   }
 
   .boot__blocks i {
-    background: var(--c-blue);
+    background: var(--c-cream);
     opacity: 0.08;
     transition: opacity 0.2s linear;
   }
 
   .boot__blocks i.is-on {
     opacity: 1;
+  }
+
+  .boot__blocks i.is-on:last-of-type,
+  .boot__blocks i.is-on:has(+ i:not(.is-on)) {
+    background: var(--c-violet);
   }
 
   .boot__status {

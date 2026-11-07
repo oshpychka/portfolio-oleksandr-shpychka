@@ -1,12 +1,14 @@
-import { gsap, ScrollTrigger, MOTION, DESKTOP } from './gsap';
+import { gsap, ScrollTrigger, DESKTOP } from './gsap';
 import { logo, LOGO_BOX } from '../data/logo';
 
 const NS = 'http://www.w3.org/2000/svg';
 const HEAD_AT = 0.68;
-const SAMPLE_STEP = 6;
+const TOP_ZONE = 220;
+const SAMPLE_STEP = 8;
 
 type Point = { x: number; y: number };
 type Tone = 'hero' | 'dark' | 'cream';
+type Segment = { a: Point; c?: Point; b: Point; length: number; start: number };
 
 interface Node {
   length: number;
@@ -19,9 +21,9 @@ interface Node {
 }
 
 interface Geometry {
-  d: string;
   total: number;
   lettersLength: number;
+  stub: number;
   samplesLength: Float32Array;
   samplesY: Float32Array;
   nodes: Node[];
@@ -36,11 +38,14 @@ const docRect = (el: Element) => {
 const toneOf = (section: Element): Tone =>
   section.hasAttribute('data-line-hero') ? 'hero' : section.classList.contains('theme-cream') ? 'cream' : 'dark';
 
+const fmt = (n: number) => n.toFixed(2);
+
 function transformLetters(d: string, box: { left: number; top: number; width: number }) {
   const s = box.width / LOGO_BOX.width;
   const tokens = d.match(/[A-Za-z]|-?\d*\.?\d+/g) ?? [];
   let out = '';
   let pair: number[] = [];
+  let last: Point = { x: 0, y: 0 };
   for (const token of tokens) {
     if (/[A-Za-z]/.test(token)) {
       out += ` ${token}`;
@@ -48,28 +53,48 @@ function transformLetters(d: string, box: { left: number; top: number; width: nu
     }
     pair.push(Number(token));
     if (pair.length === 2) {
-      const x = box.left + (pair[0] - LOGO_BOX.x) * s;
-      const y = box.top + (pair[1] - LOGO_BOX.y) * s;
-      out += ` ${x.toFixed(2)} ${y.toFixed(2)}`;
+      last = { x: box.left + (pair[0] - LOGO_BOX.x) * s, y: box.top + (pair[1] - LOGO_BOX.y) * s };
+      out += ` ${fmt(last.x)} ${fmt(last.y)}`;
       pair = [];
     }
   }
-  const exitMatch = logo.letters.match(/(-?\d*\.?\d+)\s+(-?\d*\.?\d+)\s*$/);
-  const exit = exitMatch
-    ? { x: box.left + (Number(exitMatch[1]) - LOGO_BOX.x) * s, y: box.top + (Number(exitMatch[2]) - LOGO_BOX.y) * s }
-    : { x: box.left + box.width, y: box.top };
-  return { d: out.trim(), exit };
+  return { d: out.trim(), exit: last, scale: s };
 }
 
-function roundedPolyline(points: Point[], radius: number) {
+function quadLength(a: Point, c: Point, b: Point) {
+  let len = 0;
+  let prev = a;
+  for (let i = 1; i <= 12; i++) {
+    const t = i / 12;
+    const mt = 1 - t;
+    const p = { x: mt * mt * a.x + 2 * mt * t * c.x + t * t * b.x, y: mt * mt * a.y + 2 * mt * t * c.y + t * t * b.y };
+    len += Math.hypot(p.x - prev.x, p.y - prev.y);
+    prev = p;
+  }
+  return len;
+}
+
+function buildTail(points: Point[], radius: number, offset: number) {
   const clean = points.filter((p, i) => i === 0 || Math.hypot(p.x - points[i - 1].x, p.y - points[i - 1].y) > 0.5);
-  let d = '';
+  const segments: Segment[] = [];
+  const vertexLength = new Map<Point, number>();
+  let cursor = clean[0];
+  let length = offset;
+  const push = (seg: Omit<Segment, 'length' | 'start'>) => {
+    const l = seg.c ? quadLength(seg.a, seg.c, seg.b) : Math.hypot(seg.b.x - seg.a.x, seg.b.y - seg.a.y);
+    if (l < 0.01) return;
+    segments.push({ ...seg, length: l, start: length });
+    length += l;
+  };
+  vertexLength.set(clean[0], offset);
   for (let i = 1; i < clean.length; i++) {
     const prev = clean[i - 1];
     const curr = clean[i];
     const next = clean[i + 1];
     if (!next) {
-      d += ` L ${curr.x.toFixed(2)} ${curr.y.toFixed(2)}`;
+      push({ a: cursor, b: curr });
+      vertexLength.set(curr, length);
+      cursor = curr;
       continue;
     }
     const inLen = Math.hypot(curr.x - prev.x, curr.y - prev.y);
@@ -77,9 +102,34 @@ function roundedPolyline(points: Point[], radius: number) {
     const r = Math.min(radius, inLen / 2, outLen / 2);
     const a = { x: curr.x - ((curr.x - prev.x) / inLen) * r, y: curr.y - ((curr.y - prev.y) / inLen) * r };
     const b = { x: curr.x + ((next.x - curr.x) / outLen) * r, y: curr.y + ((next.y - curr.y) / outLen) * r };
-    d += ` L ${a.x.toFixed(2)} ${a.y.toFixed(2)} Q ${curr.x.toFixed(2)} ${curr.y.toFixed(2)} ${b.x.toFixed(2)} ${b.y.toFixed(2)}`;
+    push({ a: cursor, b: a });
+    const before = length;
+    push({ a, c: curr, b });
+    vertexLength.set(curr, before + (length - before) / 2);
+    cursor = b;
   }
-  return d;
+  const d = segments
+    .map((s) => (s.c ? ` L ${fmt(s.a.x)} ${fmt(s.a.y)} Q ${fmt(s.c.x)} ${fmt(s.c.y)} ${fmt(s.b.x)} ${fmt(s.b.y)}` : ` L ${fmt(s.b.x)} ${fmt(s.b.y)}`))
+    .join('');
+  return { d, segments, end: length, vertexLength };
+}
+
+function sampleTail(segments: Segment[], lettersLength: number) {
+  const lengths: number[] = [lettersLength];
+  const ys: number[] = [segments[0]?.a.y ?? 0];
+  let maxY = ys[0];
+  for (const s of segments) {
+    const steps = Math.max(1, Math.ceil(s.length / SAMPLE_STEP));
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const mt = 1 - t;
+      const y = s.c ? mt * mt * s.a.y + 2 * mt * t * s.c.y + t * t * s.b.y : s.a.y + (s.b.y - s.a.y) * t;
+      maxY = Math.max(maxY, y);
+      lengths.push(s.start + s.length * t);
+      ys.push(maxY);
+    }
+  }
+  return { samplesLength: Float32Array.from(lengths), samplesY: Float32Array.from(ys) };
 }
 
 export function initLine() {
@@ -112,11 +162,11 @@ export function initLine() {
     cream: svg.querySelector('#trace-clip-cream')!,
   };
 
-  const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const desktop = () => window.matchMedia(DESKTOP).matches;
+  const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const desktopQuery = window.matchMedia(DESKTOP);
 
   let geo: Geometry | null = null;
-  const state = { start: 0, head: 0, intro: reduce() ? 1 : 0 };
+  const state = { start: 0, head: 0, intro: 0, wiggle: 0 };
 
   const build = (): Geometry => {
     const width = document.documentElement.clientWidth;
@@ -125,22 +175,19 @@ export function initLine() {
     svg.setAttribute('height', String(height));
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
-    const isDesktop = desktop();
+    const isDesktop = desktopQuery.matches;
     const container = hero.querySelector<HTMLElement>('.container') ?? hero;
     const gutter = parseFloat(getComputedStyle(container).paddingLeft) || 16;
     const laneL = Math.round(gutter / 2);
     const laneR = Math.round(width - gutter / 2);
     const radius = isDesktop ? 28 : 14;
 
-    const a = docRect(anchor);
-    const letters = transformLetters(logo.letters, a);
-
+    const letters = transformLetters(logo.letters, docRect(anchor));
     const sections = [...document.querySelectorAll<HTMLElement>('main > section')];
-    const nodeSpecs: Array<{ point: Point; tone: Tone; labels: HTMLElement[]; item?: HTMLElement }> = [];
-    const pts: Point[] = [letters.exit];
-
     const heroRect = docRect(hero);
-    pts.push({ x: laneR, y: letters.exit.y });
+    const pts: Point[] = [letters.exit, { x: laneR, y: letters.exit.y }];
+    const nodeSpecs: Array<{ point: Point; tone: Tone; labels: HTMLElement[]; item?: HTMLElement }> = [];
+    const last = () => pts[pts.length - 1];
 
     sections.forEach((section, index) => {
       if (section === hero) return;
@@ -152,25 +199,22 @@ export function initLine() {
       const headRect = head ? docRect(head.querySelector('span') ?? head) : null;
       const nodeY = headRect ? headRect.top + headRect.height / 2 : rect.top + pad;
 
-      if (isDesktop || pts[pts.length - 1].x !== laneL) {
+      if (isDesktop || last().x !== laneL) {
         const yIn = rect.top + Math.min(pad * 0.42, Math.max(24, nodeY - rect.top - 48));
-        pts.push({ x: pts[pts.length - 1].x, y: yIn });
-        pts.push({ x: laneL, y: yIn });
+        pts.push({ x: last().x, y: yIn }, { x: laneL, y: yIn });
       }
-      pts.push({ x: laneL, y: nodeY });
-      nodeSpecs.push({ point: { x: laneL, y: nodeY }, tone, labels: head ? [...head.querySelectorAll<HTMLElement>('[data-scramble="node"]')] : [] });
+      const nodePoint = { x: laneL, y: nodeY };
+      pts.push(nodePoint);
+      nodeSpecs.push({ point: nodePoint, tone, labels: head ? [...head.querySelectorAll<HTMLElement>('[data-scramble="node"]')] : [] });
 
       const timeline = section.querySelector<HTMLElement>('[data-timeline]');
       if (timeline) {
         const t = docRect(timeline);
         const axisX = t.left + 6.5;
-        const items = [...timeline.querySelectorAll<HTMLElement>(':scope > li')];
         const yJog = t.top - Math.min(22, (t.top - nodeY) / 3);
-        pts.push({ x: laneL, y: yJog });
-        pts.push({ x: axisX, y: yJog });
-        items.forEach((item) => {
-          const r = docRect(item);
-          const p = { x: axisX, y: r.top + 10.5 };
+        pts.push({ x: laneL, y: yJog }, { x: axisX, y: yJog });
+        timeline.querySelectorAll<HTMLElement>(':scope > li').forEach((item) => {
+          const p = { x: axisX, y: docRect(item).top + 10.5 };
           pts.push(p);
           nodeSpecs.push({ point: p, tone, labels: [], item });
         });
@@ -179,22 +223,15 @@ export function initLine() {
       if (isLast) {
         const footer = section.querySelector('footer');
         const endY = footer ? docRect(footer).top - 48 : rect.bottom - pad;
-        pts.push({ x: pts[pts.length - 1].x, y: Math.max(endY, pts[pts.length - 1].y + 40) });
+        pts.push({ x: last().x, y: Math.max(endY, last().y + 40) });
         return;
       }
 
       const yOut = rect.bottom - Math.min(pad * 0.45, 120);
-      pts.push({ x: pts[pts.length - 1].x, y: yOut });
-      if (isDesktop) {
-        pts.push({ x: laneR, y: yOut });
-      } else if (pts[pts.length - 1].x !== laneL) {
-        pts.push({ x: laneL, y: yOut });
-      }
+      pts.push({ x: last().x, y: yOut });
+      if (isDesktop) pts.push({ x: laneR, y: yOut });
+      else if (last().x !== laneL) pts.push({ x: laneL, y: yOut });
     });
-
-    const d = `${letters.d}${roundedPolyline(pts, radius)}`;
-    paths.forEach((p) => p.setAttribute('d', d));
-    const total = paths[0].getTotalLength();
 
     const probe = document.createElementNS(NS, 'path');
     probe.setAttribute('d', letters.d);
@@ -202,42 +239,27 @@ export function initLine() {
     const lettersLength = probe.getTotalLength();
     probe.remove();
 
-    const count = Math.ceil((total - lettersLength) / SAMPLE_STEP) + 1;
-    const samplesLength = new Float32Array(count);
-    const samplesY = new Float32Array(count);
-    let maxY = -Infinity;
-    for (let i = 0; i < count; i++) {
-      const len = Math.min(total, lettersLength + i * SAMPLE_STEP);
-      const pt = paths[0].getPointAtLength(len);
-      maxY = Math.max(maxY, pt.y);
-      samplesLength[i] = len;
-      samplesY[i] = maxY;
-    }
-
-    const nearestLength = (p: Point) => {
-      let best = 0;
-      let bestDist = Infinity;
-      for (let i = 0; i < count; i++) {
-        if (Math.abs(samplesY[i] - p.y) > 40) continue;
-        const pt = paths[0].getPointAtLength(samplesLength[i]);
-        const dist = Math.hypot(pt.x - p.x, pt.y - p.y);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = samplesLength[i];
-        }
-      }
-      return best;
-    };
+    const tail = buildTail(pts, radius, lettersLength);
+    const d = `${letters.d}${tail.d}`;
+    paths.forEach((p) => p.setAttribute('d', d));
+    const { samplesLength, samplesY } = sampleTail(tail.segments, lettersLength);
 
     const previous = geo?.nodes ?? [];
     nodesGroup.replaceChildren();
     const nodes: Node[] = nodeSpecs.map((spec, i) => {
-      const node: Node = { length: nearestLength(spec.point), point: spec.point, tone: spec.tone, labels: spec.labels, item: spec.item, lit: previous[i]?.lit ?? false };
+      const node: Node = {
+        length: tail.vertexLength.get(spec.point) ?? tail.end,
+        point: spec.point,
+        tone: spec.tone,
+        labels: spec.labels,
+        item: spec.item,
+        lit: previous[i]?.lit ?? false,
+      };
       if (!spec.item) {
         const c = document.createElementNS(NS, 'circle');
-        c.setAttribute('cx', spec.point.x.toFixed(2));
-        c.setAttribute('cy', spec.point.y.toFixed(2));
-        c.setAttribute('r', isDesktop ? '5' : '4');
+        c.setAttribute('cx', fmt(spec.point.x));
+        c.setAttribute('cy', fmt(spec.point.y));
+        c.setAttribute('r', isDesktop ? '6' : '5');
         c.classList.add('trace__node', `trace__node--${spec.tone}`);
         c.classList.toggle('is-lit', node.lit);
         nodesGroup.appendChild(c);
@@ -254,29 +276,43 @@ export function initLine() {
             const r = docRect(s);
             const rect = document.createElementNS(NS, 'rect');
             rect.setAttribute('x', '0');
-            rect.setAttribute('y', r.top.toFixed(2));
+            rect.setAttribute('y', fmt(r.top));
             rect.setAttribute('width', String(width));
-            rect.setAttribute('height', r.height.toFixed(2));
+            rect.setAttribute('height', fmt(r.height));
             return rect;
           }),
       );
     });
 
-    return { d, total, lettersLength, samplesLength, samplesY, nodes, heroHeight: heroRect.height };
+    return {
+      total: tail.end,
+      lettersLength,
+      stub: Math.max(10, 9 * letters.scale),
+      samplesLength,
+      samplesY,
+      nodes,
+      heroHeight: heroRect.height,
+    };
+  };
+
+  const mappedHead = (g: Geometry, y: number) => {
+    let lo = 0;
+    let hi = g.samplesY.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (g.samplesY[mid] <= y) lo = mid;
+      else hi = mid - 1;
+    }
+    return g.samplesLength[lo];
   };
 
   const headForScroll = (g: Geometry) => {
     const maxScroll = document.documentElement.scrollHeight - innerHeight;
     if (scrollY >= maxScroll - 2) return g.total;
-    const target = scrollY + innerHeight * HEAD_AT;
-    let lo = 0;
-    let hi = g.samplesY.length - 1;
-    while (lo < hi) {
-      const mid = (lo + hi + 1) >> 1;
-      if (g.samplesY[mid] <= target) lo = mid;
-      else hi = mid - 1;
-    }
-    return g.samplesLength[lo];
+    const rest = g.lettersLength + g.stub;
+    const mapped = Math.max(rest, mappedHead(g, scrollY + innerHeight * HEAD_AT));
+    const blend = gsap.utils.clamp(0, 1, scrollY / TOP_ZONE);
+    return rest + (mapped - rest) * blend;
   };
 
   const startForScroll = (g: Geometry) => g.lettersLength * gsap.utils.clamp(0, 1, scrollY / (g.heroHeight * 0.55));
@@ -291,12 +327,14 @@ export function initLine() {
 
   const render = () => {
     if (!geo) return;
-    const head = Math.max(0, state.head * state.intro);
+    const head = Math.min(geo.total, Math.max(0, (state.head + state.wiggle) * state.intro));
     const start = Math.min(state.start, head);
     const visible = Math.max(0, head - start);
+    const dash = `${visible.toFixed(1)} ${(geo.total + 10).toFixed(1)}`;
+    const offset = (-start).toFixed(1);
     paths.forEach((p) => {
-      p.style.strokeDasharray = `${visible.toFixed(1)} ${(geo!.total + 10).toFixed(1)}`;
-      p.style.strokeDashoffset = `${(-start).toFixed(1)}`;
+      p.style.strokeDasharray = dash;
+      p.style.strokeDashoffset = offset;
     });
     geo.nodes.forEach((node) => {
       const reached = head >= node.length - 1;
@@ -311,47 +349,74 @@ export function initLine() {
     });
   };
 
-  const cleanups: Array<() => void> = [];
-  const mm = gsap.matchMedia();
+  const tug = (k: number) => k * (geo?.stub ?? 20);
+  const idle = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.9, repeatRefresh: true, onUpdate: render });
+  idle
+    .to(state, { wiggle: () => tug(2.2), duration: 0.16, ease: 'power3.out' })
+    .to(state, { wiggle: () => tug(0.3), duration: 0.9, ease: 'elastic.out(1, 0.32)' })
+    .to(state, { wiggle: () => tug(1.6), duration: 0.12, ease: 'power3.out' }, '+=0.7')
+    .to(state, { wiggle: () => tug(0.1), duration: 0.18, ease: 'power2.in' })
+    .to(state, { wiggle: () => tug(1.9), duration: 0.12, ease: 'power3.out' })
+    .to(state, { wiggle: 0, duration: 0.8, ease: 'elastic.out(1, 0.3)' })
+    .to(state, { wiggle: () => tug(5.5), duration: 0.42, ease: 'power4.out' }, '+=1.1')
+    .to(state, { wiggle: () => tug(5.1), duration: 0.35, ease: 'sine.inOut' })
+    .to(state, { wiggle: () => tug(-0.4), duration: 0.32, ease: 'back.in(2.4)' })
+    .to(state, { wiggle: 0, duration: 0.7, ease: 'elastic.out(1, 0.35)' });
 
-  mm.add({ motion: MOTION, reduced: '(prefers-reduced-motion: reduce)' }, (ctx) => {
-    geo = build();
-    if (ctx.conditions?.reduced) {
+  let atTop = scrollY < 8;
+  const setIdle = () => {
+    const shouldPlay = atTop && state.intro >= 1 && !reduceQuery.matches && !document.hidden;
+    if (shouldPlay && idle.paused()) idle.restart();
+    if (!shouldPlay && !idle.paused()) {
+      idle.pause();
+      gsap.to(state, { wiggle: 0, duration: 0.3, ease: 'power2.out', onUpdate: render });
+    }
+  };
+
+  const toHead = gsap.quickTo(state, 'head', { duration: 0.6, ease: 'power3.out', onUpdate: render });
+  const toStart = gsap.quickTo(state, 'start', { duration: 0.6, ease: 'power3.out', onUpdate: render });
+
+  const sync = (animate: boolean) => {
+    if (!geo) return;
+    if (reduceQuery.matches) {
+      idle.pause();
       state.intro = 1;
       state.start = 0;
       state.head = geo.total;
+      state.wiggle = 0;
       render();
       return;
     }
+    const head = headForScroll(geo);
+    const start = startForScroll(geo);
+    if (animate) {
+      toHead(head);
+      toStart(start);
+    } else {
+      state.head = head;
+      state.start = start;
+      render();
+    }
+    const top = scrollY < 8;
+    if (top !== atTop) {
+      atTop = top;
+      setIdle();
+    }
+  };
 
-    const toHead = gsap.quickTo(state, 'head', { duration: 0.6, ease: 'power3.out', onUpdate: render });
-    const toStart = gsap.quickTo(state, 'start', { duration: 0.6, ease: 'power3.out', onUpdate: render });
+  geo = build();
+  sync(false);
+  const intro = reduceQuery.matches
+    ? null
+    : gsap.fromTo(state, { intro: 0 }, { intro: 1, duration: 2.2, ease: 'power2.inOut', delay: 0.15, onUpdate: render, onComplete: setIdle });
 
-    state.head = headForScroll(geo);
-    state.start = startForScroll(geo);
-    const intro = gsap.fromTo(state, { intro: 0 }, { intro: 1, duration: 2.4, ease: 'power2.inOut', onUpdate: render, delay: 0.2 });
-
-    const trigger = ScrollTrigger.create({
-      start: 0,
-      end: 'max',
-      onUpdate: () => {
-        if (!geo) return;
-        toHead(headForScroll(geo));
-        toStart(startForScroll(geo));
-      },
-      onRefresh: () => {
-        if (!geo) return;
-        toHead(headForScroll(geo));
-        toStart(startForScroll(geo));
-      },
-    });
-
-    return () => {
-      intro.kill();
-      trigger.kill();
-    };
-  });
-  cleanups.push(() => mm.revert());
+  const trigger = ScrollTrigger.create({ start: 0, end: 'max', onUpdate: () => sync(true), onRefresh: () => sync(true) });
+  const onReduce = () => {
+    sync(false);
+    setIdle();
+  };
+  reduceQuery.addEventListener('change', onReduce);
+  document.addEventListener('visibilitychange', setIdle);
 
   let timer = 0;
   let lastWidth = document.documentElement.clientWidth;
@@ -361,33 +426,27 @@ export function initLine() {
     timer = window.setTimeout(() => {
       const w = document.documentElement.clientWidth;
       const h = document.documentElement.scrollHeight;
-      if (w === lastWidth && h === lastHeight && geo) return;
+      if (w === lastWidth && h === lastHeight) return;
       lastWidth = w;
       lastHeight = h;
       geo = build();
-      if (reduce()) state.head = geo.total;
-      else {
-        state.head = headForScroll(geo);
-        state.start = startForScroll(geo);
-      }
-      render();
-    }, 180);
+      sync(false);
+    }, 200);
   };
   const ro = new ResizeObserver(rebuild);
   ro.observe(document.body);
   window.addEventListener('resize', rebuild);
-  document.fonts?.ready.then(() => {
-    lastHeight = -1;
-    rebuild();
-  });
-  cleanups.push(() => {
+
+  return () => {
     window.clearTimeout(timer);
     ro.disconnect();
     window.removeEventListener('resize', rebuild);
-  });
-
-  return () => {
-    cleanups.forEach((fn) => fn());
+    reduceQuery.removeEventListener('change', onReduce);
+    document.removeEventListener('visibilitychange', setIdle);
+    trigger.kill();
+    intro?.kill();
+    idle.kill();
+    gsap.killTweensOf(state);
     svg.remove();
     root.classList.remove('has-line');
     geo = null;
