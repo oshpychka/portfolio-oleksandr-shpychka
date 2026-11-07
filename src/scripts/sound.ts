@@ -339,7 +339,18 @@ function resumeOnGesture() {
 }
 
 export function tryAutoplay() {
-  if (readPref() === 'off' || enabled) return;
-  if (!enableSound(false)) return;
-  if (ctx?.state !== 'running') resumeOnGesture();
+  const pref = readPref();
+  if (pref === 'off' || enabled) return;
+  if (pref === 'on') {
+    if (!enableSound(false)) return;
+    if (ctx?.state !== 'running') resumeOnGesture();
+    return;
+  }
+  const start = (e: Event) => {
+    if ((e.target as Element | null)?.closest?.('[data-boot-mute]')) return detach();
+    detach();
+    if (readPref() !== 'off' && !enabled) enableSound(false);
+  };
+  const detach = () => GESTURES.forEach((type) => window.removeEventListener(type, start, true));
+  GESTURES.forEach((type) => window.addEventListener(type, start, true));
 }

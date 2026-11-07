@@ -179,7 +179,11 @@ export function initBoot() {
     leave(false);
   });
 
-  tryAutoplay();
+  const idle = (fn: () => void) =>
+    'requestIdleCallback' in window ? window.requestIdleCallback(fn, { timeout: 1500 }) : window.setTimeout(fn, 200);
+  const autoplay = () => idle(() => tryAutoplay());
+  if (document.readyState === 'complete') autoplay();
+  else window.addEventListener('load', autoplay, { once: true });
   addTask = track;
   track('type', document.fonts?.ready ?? Promise.resolve(), 2);
   const covers = [...document.querySelectorAll<HTMLImageElement>('.prow__media img, .card__media img, .case-cover img')].slice(0, 8);

@@ -38,7 +38,7 @@ const byYear = [...allProjects].sort((a, b) => Number(b.year) - Number(a.year) |
           <li class="card" data-type={p.type}>
             <a href={`/work/${p.slug}`} class="card__link">
               <span class="card__media">
-                <Image src={p.cover} alt="" widths={[480, 720, 960, 1280]} sizes="(min-width: 860px) 45vw, 100vw" loading={i < 2 ? 'eager' : 'lazy'} />
+                <Image src={p.cover} alt="" widths={[480, 720, 960, 1280]} sizes="(min-width: 860px) 45vw, 100vw" loading={i < 2 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : 'auto'} />
               </span>
               <span class="card__row">
                 <h2 class="card__title">{p.title}</h2>

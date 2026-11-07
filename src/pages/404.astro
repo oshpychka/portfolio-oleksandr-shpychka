@@ -126,6 +126,17 @@ import { logo, LOGO_PIECES } from '../data/logo';
     margin-left: auto;
   }
 
+  :global(.no-js) .nf__bar,
+  :global(.no-js) .nf__howto {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .nf__kbd {
+      margin-left: 0;
+    }
+  }
+
   .game :global(.game__tag rect) {
     fill: var(--c-blue);
   }
