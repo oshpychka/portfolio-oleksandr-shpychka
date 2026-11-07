@@ -14,7 +14,7 @@
 ## Где что лежит
 
 - `REDESIGN.md` — техническое задание.
-- `references/` — скриншоты референсов (`.webp`).
+- `references/` — скриншоты референсов (`.webp`, палитра Walrus — `.png`).
 - `src/data/projects.ts` — все проекты; новые добавляются только сюда.
 - `src/assets/projects/<slug>/` — картинки проектов.
 - `public/cv/` — PDF резюме.
