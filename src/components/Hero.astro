@@ -21,6 +21,7 @@ import sceneStill from '../assets/hero/scene.png';
       <svg viewBox={`${LOGO_BOX.x} ${LOGO_BOX.y} ${LOGO_BOX.width} ${LOGO_BOX.height}`} fill="none" overflow="visible">
         <path d={logo.letters} stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
       </svg>
+      <p class="hero__logo-note mono mono-s" data-logo-note>Scroll to unravel ↓</p>
     </div>
 
     <div class="hero__stage" data-scene-area aria-hidden="true">
@@ -108,7 +109,7 @@ import sceneStill from '../assets/hero/scene.png';
     position: absolute;
     top: clamp(132px, 15vh, 180px);
     right: calc(var(--gutter) + clamp(36px, 5vw, 88px));
-    width: clamp(132px, 27vw, 440px);
+    width: clamp(150px, 29vw, 480px);
     aspect-ratio: 182 / 80;
     color: var(--c-cream);
   }
@@ -116,6 +117,20 @@ import sceneStill from '../assets/hero/scene.png';
   .hero__logo svg {
     width: 100%;
     height: 100%;
+  }
+
+  .hero__logo-note {
+    position: absolute;
+    top: calc(100% + 18px);
+    right: 0;
+    color: var(--c-cream);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.4s linear;
+  }
+
+  :global(.has-line:not(.scrolled)) .hero__logo-note {
+    opacity: 0.75;
   }
 
   :global(.has-line) .hero__logo svg,

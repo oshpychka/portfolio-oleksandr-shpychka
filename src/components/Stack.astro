@@ -16,7 +16,9 @@ import { stack } from '../data/content';
         </p>
       </div>
       <ul role="list" class="stack__words" data-physics-area>
-        {stack.map((word) => <li class="stack__word" data-physics-body>{word}</li>)}
+        {stack.map((skill, i) => (
+          <li class:list={['stack__word', skill.core ? 'stack__word--core' : i % 3 === 1 ? 'stack__word--ink' : null]} data-physics-body>{skill.name}</li>
+        ))}
       </ul>
     </div>
   </div>
@@ -100,12 +102,13 @@ import { stack } from '../data/content';
     white-space: nowrap;
   }
 
-  .stack__word:nth-child(4n + 1) {
+  .stack__word--ink {
     background: var(--fg);
     color: var(--bg);
   }
 
-  .stack__word:nth-child(7n + 3) {
+  .stack__word--core {
+    font-size: clamp(1.6rem, 1.1rem + 2.8vw, 3.75rem);
     border-color: var(--c-blue);
     background: var(--c-blue);
     color: var(--c-ink);

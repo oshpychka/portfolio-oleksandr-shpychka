@@ -61,7 +61,19 @@ main article > section > .container {
 
 .trace__path--hero {
   stroke: var(--c-cream);
-  stroke-width: 2.5px;
+  stroke-width: 3.5px;
+}
+
+.trace__head {
+  fill: var(--c-blue);
+  stroke: var(--c-cream);
+  stroke-width: 2px;
+  opacity: 0;
+  transition: opacity 0.4s linear;
+}
+
+.trace__head.is-on {
+  opacity: 1;
 }
 
 .trace__path--dark {
@@ -105,7 +117,7 @@ main article > section > .container {
   }
 
   .trace__path--hero {
-    stroke-width: 3.5px;
+    stroke-width: 5.5px;
   }
 }
 

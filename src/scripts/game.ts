@@ -11,6 +11,13 @@ export function initGame() {
   const status = document.querySelector<HTMLElement>('[data-game-status]');
   const done = document.querySelector<HTMLElement>('[data-game-done]');
   const hint = document.querySelector<HTMLElement>('[data-game-hint]');
+  const count = document.querySelector<HTMLElement>('[data-game-count]');
+  const NS = 'http://www.w3.org/2000/svg';
+  let touched = false;
+  const tag = document.createElementNS(NS, 'g');
+  tag.setAttribute('class', 'game__tag');
+  tag.setAttribute('aria-hidden', 'true');
+  tag.innerHTML = '<rect x="-36" y="-11" width="72" height="22" rx="11"></rect><text x="0" y="0">DRAG ME</text>';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const pieces: Piece[] = [...svg.querySelectorAll<SVGGElement>('[data-piece]')].map((el) => {
@@ -20,6 +27,27 @@ export function initGame() {
 
   const apply = (p: Piece) => {
     p.el.setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${p.r.toFixed(2)} ${p.cx} ${p.cy})`);
+    if (p === pieces[0] && !touched) tag.setAttribute('transform', `translate(${(p.cx + p.x).toFixed(1)} ${(p.cy + p.y - 46).toFixed(1)})`);
+  };
+  const updateCount = () => {
+    if (count) count.textContent = `${pieces.filter((q) => q.placed).length} / ${pieces.length}`;
+  };
+  let nudge: gsap.core.Timeline | null = null;
+  const startNudge = () => {
+    nudge?.kill();
+    if (reduce || touched) return;
+    const p = pieces[0];
+    nudge = gsap.timeline({ repeat: -1, repeatDelay: 1.6, delay: 1.8 });
+    nudge
+      .to(p, { r: '+=10', duration: 0.12, ease: 'power2.out', onUpdate: () => apply(p) })
+      .to(p, { r: '-=20', duration: 0.18, ease: 'power2.inOut', onUpdate: () => apply(p) })
+      .to(p, { r: '+=10', duration: 0.3, ease: 'elastic.out(1, 0.4)', onUpdate: () => apply(p) });
+  };
+  const firstTouch = () => {
+    if (touched) return;
+    touched = true;
+    nudge?.kill();
+    gsap.to(tag, { autoAlpha: 0, duration: 0.25, onComplete: () => tag.remove() });
   };
 
   const spots = [
@@ -33,6 +61,7 @@ export function initGame() {
     svg.classList.remove('is-assembled');
     if (done) done.hidden = true;
     if (hint) hint.hidden = false;
+    if (status) status.textContent = '';
     pieces.forEach((p, i) => {
       const [sx, sy] = spots[i % spots.length];
       const target = { x: sx + (Math.random() - 0.5) * 30, y: sy + (Math.random() - 0.5) * 20, r: (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * 110) };
@@ -42,6 +71,8 @@ export function initGame() {
       p.el.setAttribute('aria-pressed', 'false');
       gsap.to(p, { ...target, duration: reduce ? 0 : 1.1, delay: reduce ? 0 : 0.35 + i * 0.05, ease: 'expo.out', onUpdate: () => apply(p) });
     });
+    updateCount();
+    startNudge();
   };
 
   const finish = () => {
@@ -55,10 +86,12 @@ export function initGame() {
   const place = (p: Piece) => {
     if (p.placed) return;
     p.placed = true;
+    firstTouch();
     p.el.classList.add('is-placed');
     p.el.setAttribute('aria-pressed', 'true');
     gsap.to(p, { x: 0, y: 0, r: 0, duration: reduce ? 0 : 0.45, ease: 'back.out(2)', overwrite: true, onUpdate: () => apply(p) });
     play('node');
+    updateCount();
     const left = pieces.filter((q) => !q.placed).length;
     if (status) status.textContent = left ? `${left} ${left === 1 ? 'piece' : 'pieces'} left` : '';
     if (!left) window.setTimeout(finish, reduce ? 0 : 450);
@@ -77,6 +110,7 @@ export function initGame() {
     const p = pieces.find((q) => q.el === el);
     if (!p || p.placed) return;
     e.preventDefault();
+    firstTouch();
     gsap.killTweensOf(p);
     const s = toSvg(e);
     drag = { p, id: e.pointerId, ox: s.x - p.x, oy: s.y - p.y };
@@ -125,9 +159,12 @@ export function initGame() {
   svg.addEventListener('keydown', onKey);
   restart?.addEventListener('click', onRestart);
   svg.classList.add('is-live');
+  svg.appendChild(tag);
   scatter();
 
   return () => {
+    nudge?.kill();
+    tag.remove();
     pieces.forEach((p) => gsap.killTweensOf(p));
     svg.removeEventListener('pointerdown', onDown);
     svg.removeEventListener('pointermove', onMove);

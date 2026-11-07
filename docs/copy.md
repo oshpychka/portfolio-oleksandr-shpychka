@@ -81,7 +81,7 @@ BASED IN UKRAINE
 
 **Текст:**
 
-> I'm Oleksandr, a frontend developer. Since 2023 I've been building websites and web apps for my own clients. From 2024 to 2025 I also worked at Bato Web Agency, where I made custom WordPress themes, 3D scenes animated with GSAP and interactive UI demos for CodePen.
+> I'm Oleksandr, a frontend developer. Since 2023 I've been building websites and web apps for my own clients. From 2024 to 2025 I also worked at Bato Web Agency, where I made custom WordPress themes, 3D scenes animated with GSAP and interactive UI demos for CodePen. Since January 2025 I've been building WordPress sites, payment integrations and custom plugins at Consultant LM LLC.
 >
 > I like work where design and code meet: a layout that holds up on every screen, an animation that explains instead of decorating, a CMS the client can use without calling me.
 >
@@ -161,7 +161,9 @@ BASED IN UKRAINE
 **Подсказка (моно, только на десктопе с JS):** `GRAB A WORD. THROW IT.`
 **На тач-устройствах:** `TAP AND DRAG`
 
-Слова: HTML & CSS · JavaScript · TypeScript · React · Next.js · Redux · WordPress · GSAP · Three.js · REST APIs · Node.js · Express · MongoDB · Git & GitHub · Figma
+Основные (синие, крупнее): WordPress · PHP · HTML & CSS · JavaScript
+
+Остальные: TypeScript · React · Next.js · Redux · GSAP · Three.js · REST APIs · Node.js · Express · MongoDB · Git & GitHub · Figma
 
 ---
 
@@ -182,6 +184,12 @@ Frontend / WordPress Developer
 - Made interactive 3D objects and scroll animations with GSAP.
 - Created UI animations and interactive demos for CodePen.
 - Built web apps with React and Next.js.
+
+**Jan 2025 — Nov 2026 · Consultant LM LLC**
+WordPress Developer
+- Built WordPress sites and custom websites for clients.
+- Connected online payments.
+- Developed custom WordPress plugins.
 
 **Узел в конце линии:** `NOW — open to freelance & full-time`
 
@@ -227,7 +235,9 @@ usually replies within a day
 ## 12. Страница 404
 
 **h1:** `Blueprint not found`
-**Текст:** This page fell off the drawing board. Put the modules back in place, or skip the puzzle.
+**Текст:** This page fell off the drawing board and broke the logo. Rebuild it in the mini-game, or skip it and go home.
+**Панель игры:** `// Mini-game · Rebuild the logo` · счётчик `0 / 5` · `1 · Grab a piece` · `2 · Drop it on the dashed outline` · `Keyboard: Tab to a piece, then Enter` · метка `DRAG ME`
+**Кнопка после сборки:** `Break it again`
 **Кнопка:** `BACK HOME`
 **После сборки:** `ASSEMBLED. SYSTEM RESTORED.`
 **Мелко:** `ERROR 404 · OS v2.0`
@@ -235,6 +245,8 @@ usually replies within a day
 ---
 
 ## Открытые TODO
+
+- Должность в Consultant LM LLC: указано `WordPress Developer`, нужно подтверждение.
 
 - PDF резюме: `public/cv/Oleksandr-Shpychka-CV.pdf`.
 - Ссылки на Bato, CodePen и коммерческие проекты — позже, по решению владельца.

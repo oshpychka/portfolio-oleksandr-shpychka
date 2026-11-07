@@ -6,7 +6,7 @@ export const hero = {
 export const about = {
   heading: 'I write the part of the site people actually touch.',
   paragraphs: [
-    "I'm Oleksandr, a frontend developer. Since 2023 I've been building websites and web apps for my own clients. From 2024 to 2025 I also worked at Bato Web Agency, where I made custom WordPress themes, 3D scenes animated with GSAP and interactive UI demos for CodePen.",
+    "I'm Oleksandr, a frontend developer. Since 2023 I've been building websites and web apps for my own clients. From 2024 to 2025 I also worked at Bato Web Agency, where I made custom WordPress themes, 3D scenes animated with GSAP and interactive UI demos for CodePen. Since January 2025 I've been building WordPress sites, payment integrations and custom plugins at Consultant LM LLC.",
     'I like work where design and code meet: a layout that holds up on every screen, an animation that explains instead of decorating, a CMS the client can use without calling me.',
     "I'm based in Ukraine and open to both freelance projects and full-time roles.",
   ],
@@ -18,22 +18,28 @@ export const about = {
   photoAlt: 'Portrait of Oleksandr Shpychka',
 };
 
-export const stack = [
-  'HTML & CSS',
-  'JavaScript',
-  'TypeScript',
-  'React',
-  'Next.js',
-  'Redux',
-  'WordPress',
-  'GSAP',
-  'Three.js',
-  'REST APIs',
-  'Node.js',
-  'Express',
-  'MongoDB',
-  'Git & GitHub',
-  'Figma',
+export interface Skill {
+  name: string;
+  core?: boolean;
+}
+
+export const stack: Skill[] = [
+  { name: 'WordPress', core: true },
+  { name: 'PHP', core: true },
+  { name: 'HTML & CSS', core: true },
+  { name: 'JavaScript', core: true },
+  { name: 'TypeScript' },
+  { name: 'React' },
+  { name: 'Next.js' },
+  { name: 'Redux' },
+  { name: 'GSAP' },
+  { name: 'Three.js' },
+  { name: 'REST APIs' },
+  { name: 'Node.js' },
+  { name: 'Express' },
+  { name: 'MongoDB' },
+  { name: 'Git & GitHub' },
+  { name: 'Figma' },
 ];
 
 export interface Job {
@@ -63,6 +69,17 @@ export const experience: Job[] = [
       'Made interactive 3D objects and scroll animations with GSAP.',
       'Created UI animations and interactive demos for CodePen.',
       'Built web apps with React and Next.js.',
+    ],
+  },
+  {
+    from: 'Jan 2025',
+    to: 'Nov 2026',
+    company: 'Consultant LM LLC',
+    role: 'WordPress Developer',
+    points: [
+      'Built WordPress sites and custom websites for clients.',
+      'Connected online payments.',
+      'Developed custom WordPress plugins.',
     ],
   },
 ];

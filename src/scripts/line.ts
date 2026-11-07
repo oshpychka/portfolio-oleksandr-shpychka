@@ -150,12 +150,15 @@ export function initLine() {
     <g clip-path="url(#trace-clip-hero)"><path class="trace__path trace__path--hero"></path></g>
     <g clip-path="url(#trace-clip-dark)"><path class="trace__path trace__path--dark"></path></g>
     <g clip-path="url(#trace-clip-cream)"><path class="trace__path trace__path--cream"></path></g>
-    <g class="trace__nodes"></g>`;
+    <g class="trace__nodes"></g>
+    <circle class="trace__head" r="7" cx="-50" cy="-50"></circle>`;
   document.body.appendChild(svg);
   root.classList.add('has-line');
 
   const paths = [...svg.querySelectorAll<SVGPathElement>('.trace__path')];
   const nodesGroup = svg.querySelector<SVGGElement>('.trace__nodes')!;
+  const headDot = svg.querySelector<SVGCircleElement>('.trace__head')!;
+  let lastHead = -1;
   const clips: Record<Tone, SVGClipPathElement> = {
     hero: svg.querySelector('#trace-clip-hero')!,
     dark: svg.querySelector('#trace-clip-dark')!,
@@ -242,6 +245,8 @@ export function initLine() {
     const tail = buildTail(pts, radius, lettersLength);
     const d = `${letters.d}${tail.d}`;
     paths.forEach((p) => p.setAttribute('d', d));
+    lastHead = -1;
+    headDot.setAttribute('r', isDesktop ? '7' : '5');
     const { samplesLength, samplesY } = sampleTail(tail.segments, lettersLength);
 
     const previous = geo?.nodes ?? [];
@@ -336,6 +341,13 @@ export function initLine() {
       p.style.strokeDasharray = dash;
       p.style.strokeDashoffset = offset;
     });
+    if (Math.abs(head - lastHead) > 0.4) {
+      lastHead = head;
+      const pt = paths[0].getPointAtLength(Math.max(0, head - 0.5));
+      headDot.setAttribute('cx', pt.x.toFixed(1));
+      headDot.setAttribute('cy', pt.y.toFixed(1));
+      headDot.classList.toggle('is-on', state.intro >= 1 && visible > 1);
+    }
     geo.nodes.forEach((node) => {
       const reached = head >= node.length - 1;
       if (reached === node.lit) return;

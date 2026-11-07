@@ -12,8 +12,7 @@ import { logo, LOGO_PIECES } from '../data/logo';
       <div class="nf__grid">
         <div class="nf__body">
           <h1 id="nf-title" data-reveal="lines">Blueprint not found</h1>
-          <p class="nf__text">This page fell off the drawing board. Put the modules back in place, or skip the puzzle.</p>
-          <p class="nf__hint mono mono-s muted" data-game-hint hidden>Drag the pieces into the outline · or press Enter on each one</p>
+          <p class="nf__text">This page fell off the drawing board and broke the logo. Rebuild it in the mini-game, or skip it and go home.</p>
           <div class="nf__actions">
             <a class="btn btn--primary" href="/">Back home</a>
           </div>
@@ -23,6 +22,10 @@ import { logo, LOGO_PIECES } from '../data/logo';
           </div>
         </div>
         <div class="nf__board">
+          <div class="nf__bar mono mono-s">
+            <span>// Mini-game · Rebuild the logo</span>
+            <span class="nf__count" data-game-count>0 / {LOGO_PIECES.length}</span>
+          </div>
           <svg class="game" viewBox="-190 -150 572 380" data-game aria-label="Puzzle: assemble the OS logo">
             <path class="game__ghost" d={logo.letters} />
             {LOGO_PIECES.map((d, i) => (
@@ -32,6 +35,11 @@ import { logo, LOGO_PIECES } from '../data/logo';
               </g>
             ))}
           </svg>
+          <p class="nf__howto mono mono-s" data-game-hint>
+            <span>1 · Grab a piece</span>
+            <span>2 · Drop it on the dashed outline</span>
+            <span class="nf__kbd">Keyboard: Tab to a piece, then Enter</span>
+          </p>
         </div>
       </div>
       <div class="mark-row" aria-hidden="true"><span class="plus"></span><span class="plus"></span></div>
@@ -71,9 +79,64 @@ import { logo, LOGO_PIECES } from '../data/logo';
     color: var(--muted);
   }
 
-  .nf__hint[hidden],
   .nf__done[hidden] {
     display: none;
+  }
+
+  .nf__board {
+    position: relative;
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--rule);
+    background: rgba(26, 20, 51, 0.35);
+  }
+
+  .nf__bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--c-indigo);
+  }
+
+  .nf__count {
+    color: var(--c-blue);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .game {
+    padding: 8px;
+  }
+
+  .nf__howto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+  }
+
+  .nf__howto[hidden] {
+    display: none;
+  }
+
+  .nf__kbd {
+    margin-left: auto;
+  }
+
+  .game :global(.game__tag rect) {
+    fill: var(--c-blue);
+  }
+
+  .game :global(.game__tag text) {
+    fill: var(--c-ink);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-anchor: middle;
+    dominant-baseline: central;
   }
 
   .nf__status {
