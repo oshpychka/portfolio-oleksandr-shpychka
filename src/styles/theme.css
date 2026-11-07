@@ -1,0 +1,92 @@
+.theme-dark {
+  --bg: var(--c-black);
+  --fg: var(--c-cream);
+  --muted: var(--c-muted-dark);
+  --rule: var(--c-line-dark);
+  --grid: var(--c-grid-dark);
+  --mark: rgba(247, 245, 240, 0.4);
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+.theme-cream {
+  --bg: var(--c-cream);
+  --fg: var(--c-ink);
+  --muted: var(--c-muted-light);
+  --rule: var(--c-line-light);
+  --grid: var(--c-grid-light);
+  --mark: var(--c-ink);
+  background-color: var(--bg);
+  color: var(--fg);
+  color-scheme: light;
+}
+
+.theme-indigo {
+  --bg: var(--c-indigo);
+  --fg: var(--c-cream);
+  --muted: var(--c-muted-dark);
+  --rule: var(--c-line-dark);
+  --grid: var(--c-grid-dark);
+  --mark: rgba(247, 245, 240, 0.4);
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: calc(var(--gutter) - 1px) -1px;
+}
+
+.marks {
+  position: relative;
+}
+
+.marks::before,
+.marks::after {
+  content: '';
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--mark), var(--mark)) center / 1px 100% no-repeat,
+    linear-gradient(var(--mark), var(--mark)) center / 100% 1px no-repeat;
+}
+
+.marks::before {
+  top: -7px;
+  left: -7px;
+}
+
+.marks::after {
+  top: -7px;
+  right: -7px;
+}
+
+.mark-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.mark-row > .plus {
+  flex: none;
+}
+
+.plus {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  background:
+    linear-gradient(var(--mark), var(--mark)) center / 1px 100% no-repeat,
+    linear-gradient(var(--mark), var(--mark)) center / 100% 1px no-repeat;
+}
+
+.rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+}

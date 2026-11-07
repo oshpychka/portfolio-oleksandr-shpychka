@@ -1,0 +1,50 @@
+:root {
+  --c-black: #000000;
+  --c-ink: #0a0a0c;
+  --c-cream: #f7f5f0;
+  --c-indigo: #1a1433;
+  --c-navy: #020f1f;
+  --c-blue: #5b8cff;
+  --c-violet: #5b4bd5;
+  --c-grid-dark: rgba(247, 245, 240, 0.06);
+  --c-grid-light: rgba(91, 140, 255, 0.35);
+  --c-muted-dark: rgba(247, 245, 240, 0.55);
+  --c-muted-light: rgba(10, 10, 12, 0.55);
+  --c-line-dark: rgba(247, 245, 240, 0.14);
+  --c-line-light: rgba(10, 10, 12, 0.14);
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-mono-s: clamp(0.6875rem, 0.66rem + 0.1vw, 0.75rem);
+  --fs-mono: clamp(0.75rem, 0.72rem + 0.15vw, 0.875rem);
+  --fs-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --fs-lead: clamp(1.125rem, 1.02rem + 0.5vw, 1.5rem);
+  --fs-h3: clamp(1.5rem, 1.2rem + 1.4vw, 2.5rem);
+  --fs-h2: clamp(2.5rem, 1.6rem + 4.2vw, 5.5rem);
+  --fs-h1: clamp(3rem, 1.6rem + 7vw, 9.5rem);
+  --fs-display: clamp(4rem, 1.5rem + 12.5vw, 16rem);
+
+  --tracking-tight: -0.04em;
+  --tracking-snug: -0.02em;
+  --tracking-mono: 0.08em;
+
+  --grid-size: clamp(48px, 4vw + 32px, 96px);
+  --gutter: clamp(16px, 3vw, 48px);
+  --container: 1440px;
+  --section-pad: clamp(96px, 12vw, 200px);
+  --radius-pill: 999px;
+  --radius-card: 12px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 0.2s;
+  --dur: 0.45s;
+
+  --z-line: 0;
+  --z-content: 1;
+  --z-header: 50;
+  --z-menu: 60;
+  --z-cursor: 90;
+  --z-loader: 100;
+}
