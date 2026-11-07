@@ -51,7 +51,7 @@ export function initHero() {
         try {
           const { createHeroScene } = await import('./scene/hero-scene');
           if (destroyed) return resolve();
-          scene = createHeroScene({
+          const created = createHeroScene({
             container,
             area,
             interactive: true,
@@ -63,10 +63,16 @@ export function initHero() {
               scene?.renderOnce(true);
             },
           });
-          await scene.ready;
-          if (destroyed) return resolve();
+          await created.ready;
+          if (destroyed) {
+            created.destroy();
+            return resolve();
+          }
+          // Expose the scene only after shaders compile, so it never starts mid-compile.
+          scene = created;
           scene.renderOnce();
           root.classList.add('scene-live');
+          update();
         } catch {
           root.classList.add(STATIC_CLASS);
         }

@@ -17,6 +17,13 @@ export function createStackPhysics({ area, words, onCollide }: StackPhysicsOptio
   let height = area.clientHeight;
   let walls: Matter.Body[] = [];
   const sizes = words.map((w) => ({ w: w.offsetWidth, h: w.offsetHeight }));
+  // Start every word where the static layout already drew it, so switching to physics
+  // causes no jump: the words simply let go and fall into a pile.
+  const areaRect = area.getBoundingClientRect();
+  const origins = words.map((w) => {
+    const r = w.getBoundingClientRect();
+    return { x: r.left - areaRect.left + r.width / 2, y: r.top - areaRect.top + r.height / 2 };
+  });
 
   const makeWalls = () => {
     if (walls.length) Composite.remove(world, walls);
@@ -33,16 +40,15 @@ export function createStackPhysics({ area, words, onCollide }: StackPhysicsOptio
 
   const bodies = words.map((_, i) => {
     const { w, h } = sizes[i];
-    const x = w / 2 + Math.random() * Math.max(1, width - w);
-    const y = -h - i * (h * 0.9) - Math.random() * 120;
-    return Bodies.rectangle(x, y, w, h, {
+    const body = Bodies.rectangle(origins[i].x, origins[i].y, w, h, {
       chamfer: { radius: h / 2 - 1 },
       restitution: 0.32,
       friction: 0.08,
       frictionAir: 0.012,
       density: 0.0018,
-      angle: (Math.random() - 0.5) * 0.6,
     });
+    Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.02);
+    return body;
   });
   Composite.add(world, bodies);
 
@@ -155,7 +161,9 @@ export function createStackPhysics({ area, words, onCollide }: StackPhysicsOptio
       const upright = Math.sin(b.angle);
       Body.setAngularVelocity(b, b.angularVelocity * 0.985 - upright * 0.0035 * (dt / 16.7));
     });
-    Engine.update(engine, dt);
+    // Matter is only stable up to ~16.7ms per step: split long frames into sub-steps.
+    const steps = Math.ceil(dt / 16.667);
+    for (let i = 0; i < steps; i++) Engine.update(engine, dt / steps);
     bodies.forEach((b) => {
       if (b.position.y > height + 200 || b.position.x < -200 || b.position.x > width + 200) {
         Body.setPosition(b, { x: width / 2, y: -100 });

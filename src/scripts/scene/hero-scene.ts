@@ -302,25 +302,28 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
   let running = false;
   let lastTime = 0;
   let clock = 0;
-  let perfFrames = 0;
-  let perfStart = 0;
+  // Perf probe: skip the busy first seconds (page transition, script init), then judge by the
+  // median frame time so a few long frames don't freeze the scene for good.
+  const PERF_DELAY = 1500;
+  const PERF_SAMPLES = 60;
+  const perfSamples: number[] = [];
   let firstFrameAt = 0;
   let checkedPerf = false;
 
   const frame = (now: number) => {
     if (!running) return;
     raf = requestAnimationFrame(frame);
-    const dt = Math.min(0.05, lastTime ? (now - lastTime) / 1000 : 0.016);
+    const rawDt = lastTime ? now - lastTime : 16.7;
+    const dt = Math.min(0.05, rawDt / 1000);
     lastTime = now;
     clock += dt;
     if (!firstFrameAt) firstFrameAt = now;
-    if (!checkedPerf && now - firstFrameAt > 500) {
-      if (!perfStart) perfStart = now;
-      perfFrames += 1;
-      const elapsed = (now - perfStart) / 1000;
-      if (elapsed >= 1.2 || perfFrames >= 60) {
+    if (!checkedPerf && now - firstFrameAt > PERF_DELAY && rawDt < 250) {
+      perfSamples.push(rawDt);
+      if (perfSamples.length >= PERF_SAMPLES) {
         checkedPerf = true;
-        if (elapsed / perfFrames > 1 / 32) {
+        const median = perfSamples.sort((a, b) => a - b)[PERF_SAMPLES >> 1];
+        if (median > 1000 / 30) {
           onSlow?.();
           return;
         }
@@ -335,6 +338,7 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
     if (running) return;
     running = true;
     lastTime = 0;
+    firstFrameAt = 0;
     raf = requestAnimationFrame(frame);
   };
 

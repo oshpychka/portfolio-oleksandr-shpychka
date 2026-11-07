@@ -30,8 +30,11 @@ export function initMenu() {
       setOpen(false);
     }
   };
+  // Capture on window so the menu closes (and Lenis resumes) before the anchor scroll handler runs.
   const onLink = (e: Event) => {
-    if ((e.target as HTMLElement).closest('a')) {
+    if (menu.hidden) return;
+    const target = e.target as HTMLElement;
+    if (menu.contains(target) && target.closest('a')) {
       lastFocus = null;
       setOpen(false);
     }
@@ -41,13 +44,13 @@ export function initMenu() {
   };
 
   toggle.addEventListener('click', onToggle);
-  menu.addEventListener('click', onLink);
+  window.addEventListener('click', onLink, true);
   document.addEventListener('keydown', onKey);
   window.addEventListener('resize', onResize);
 
   return () => {
     toggle.removeEventListener('click', onToggle);
-    menu.removeEventListener('click', onLink);
+    window.removeEventListener('click', onLink, true);
     document.removeEventListener('keydown', onKey);
     window.removeEventListener('resize', onResize);
     setOpen(false);

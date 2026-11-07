@@ -8,40 +8,50 @@ export function initStack() {
 
   const words = [...area.querySelectorAll<HTMLElement>('[data-physics-body]')];
   let physics: StackPhysics | null = null;
-  let loading = false;
-  let visible = false;
+  let loading: Promise<void> | null = null;
+  let inView = false;
+  let seen = false;
   let destroyed = false;
 
   const update = () => {
     if (!physics) return;
-    if (visible && !document.hidden) physics.start();
+    if (inView && !document.hidden) physics.start();
     else physics.stop();
   };
 
-  const load = async () => {
-    if (loading || physics) return;
-    loading = true;
-    const { createStackPhysics } = await import('./stack-physics');
-    if (destroyed) return;
-    physics = createStackPhysics({ area, words, onCollide: (s) => play('collide', s * 0.7) });
-    if (hint) hint.hidden = false;
-    update();
-  };
+  // Load matter-js and build the world well before the section is on screen,
+  // so the moment it scrolls in the words just start falling, without a hitch.
+  const load = () =>
+    (loading ??= import('./stack-physics').then(({ createStackPhysics }) => {
+      if (destroyed) return;
+      physics = createStackPhysics({ area, words, onCollide: (s) => play('collide', s * 0.7) });
+      if (hint) hint.hidden = false;
+      update();
+    }));
 
-  const io = new IntersectionObserver(
+  const near = new IntersectionObserver(
     ([entry]) => {
-      visible = entry.isIntersecting;
-      if (visible && entry.intersectionRatio >= 0.2) load();
+      if (entry.isIntersecting) load();
+    },
+    { rootMargin: '100% 0px' },
+  );
+  const view = new IntersectionObserver(
+    ([entry]) => {
+      // First drop waits until a good part of the area is visible; after that it runs whenever on screen.
+      if (entry.intersectionRatio >= 0.3) seen = true;
+      inView = entry.isIntersecting && seen;
       update();
     },
-    { threshold: [0, 0.2, 0.5] },
+    { threshold: [0, 0.3] },
   );
-  io.observe(area);
+  near.observe(area);
+  view.observe(area);
   document.addEventListener('visibilitychange', update);
 
   return () => {
     destroyed = true;
-    io.disconnect();
+    near.disconnect();
+    view.disconnect();
     document.removeEventListener('visibilitychange', update);
     physics?.destroy();
     physics = null;

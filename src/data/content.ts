@@ -72,7 +72,7 @@ export const experience: Job[] = [
     ],
   },
   {
-    from: 'Jan 2025',
+    from: 'Jan 2026',
     to: 'Nov 2026',
     company: 'Consultant LM LLC',
     role: 'Frontend / WordPress Developer',
