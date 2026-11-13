@@ -121,7 +121,7 @@ const blank = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAI
   }
 
   @media (max-width: 860px) {
-    .hero__stage :global(.hero__still--m) {
+    :global(html:not(.scene-live)) .hero__stage :global(.hero__still--m) {
       display: block;
     }
   }

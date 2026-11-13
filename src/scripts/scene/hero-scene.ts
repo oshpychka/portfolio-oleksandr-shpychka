@@ -52,8 +52,9 @@ function seeded(seed: number) {
 }
 
 export function createHeroScene({ container, area: areaEl, interactive, onCollide, onSlow }: SceneOptions) {
-  const renderer = new WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const renderer = new WebGLRenderer({ antialias: !coarse, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, coarse ? 2 : 1.5));
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -210,6 +211,9 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
 
   const onPointerMove = (e: PointerEvent) => setPointer(e.clientX, e.clientY);
   const onPointerLeave = () => (pointerActive = false);
+  const onPointerUp = (e: PointerEvent) => {
+    if (e.pointerType !== 'mouse') pointerActive = false;
+  };
   let lastScroll = scrollY;
   const onScroll = () => {
     const delta = scrollY - lastScroll;
@@ -224,6 +228,8 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
   if (interactive) {
     window.addEventListener('pointermove', onPointerMove, { passive: true });
     window.addEventListener('pointerdown', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp, { passive: true });
+    window.addEventListener('pointercancel', onPointerUp, { passive: true });
     document.documentElement.addEventListener('pointerleave', onPointerLeave);
     window.addEventListener('scroll', onScroll, { passive: true });
   }
@@ -375,6 +381,8 @@ export function createHeroScene({ container, area: areaEl, interactive, onCollid
       ro.disconnect();
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerdown', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);
       window.removeEventListener('scroll', onScroll);
       parts.forEach((p) => p.geometry.dispose());

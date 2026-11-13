@@ -19,8 +19,7 @@ export function initHero() {
   const root = document.documentElement;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const touch = window.matchMedia('(hover: none), (pointer: coarse), (max-width: 860px)').matches;
-  if (reduce || touch || weakDevice() || !('WebGLRenderingContext' in window)) {
+  if (reduce || weakDevice() || !('WebGLRenderingContext' in window)) {
     root.classList.add(STATIC_CLASS);
     return () => root.classList.remove(STATIC_CLASS);
   }
