@@ -28,6 +28,7 @@ interface Geometry {
   samplesY: Float32Array;
   nodes: Node[];
   heroHeight: number;
+  finale: { y: number; length: number } | null;
 }
 
 const docRect = (el: Element) => {
@@ -61,6 +62,18 @@ function transformLetters(d: string, box: { left: number; top: number; width: nu
   return { d: out.trim(), exit: last, scale: s };
 }
 
+function parseSegments(d: string) {
+  const segments: Array<Pick<Segment, 'a' | 'c' | 'b'>> = [];
+  let cursor: Point = { x: 0, y: 0 };
+  for (const command of d.match(/[MLQ][^MLQ]*/g) ?? []) {
+    const n = command.slice(1).trim().split(/\s+/).map(Number);
+    if (command[0] === 'M') cursor = { x: n[0], y: n[1] };
+    else if (command[0] === 'L') segments.push({ a: cursor, b: (cursor = { x: n[0], y: n[1] }) });
+    else segments.push({ a: cursor, c: { x: n[0], y: n[1] }, b: (cursor = { x: n[2], y: n[3] }) });
+  }
+  return segments;
+}
+
 function quadLength(a: Point, c: Point, b: Point) {
   let len = 0;
   let prev = a;
@@ -74,14 +87,17 @@ function quadLength(a: Point, c: Point, b: Point) {
   return len;
 }
 
+const segmentLength = (s: Pick<Segment, 'a' | 'c' | 'b'>) =>
+  s.c ? quadLength(s.a, s.c, s.b) : Math.hypot(s.b.x - s.a.x, s.b.y - s.a.y);
+
 function buildTail(points: Point[], radius: number, offset: number) {
   const clean = points.filter((p, i) => i === 0 || Math.hypot(p.x - points[i - 1].x, p.y - points[i - 1].y) > 0.5);
   const segments: Segment[] = [];
   const vertexLength = new Map<Point, number>();
   let cursor = clean[0];
   let length = offset;
-  const push = (seg: Omit<Segment, 'length' | 'start'>) => {
-    const l = seg.c ? quadLength(seg.a, seg.c, seg.b) : Math.hypot(seg.b.x - seg.a.x, seg.b.y - seg.a.y);
+  const push = (seg: Pick<Segment, 'a' | 'c' | 'b'>) => {
+    const l = segmentLength(seg);
     if (l < 0.01) return;
     segments.push({ ...seg, length: l, start: length });
     length += l;
@@ -165,6 +181,7 @@ function pointOn(segments: Segment[], len: number): Point | null {
 export function initLine() {
   const hero = document.querySelector<HTMLElement>('[data-line-hero]');
   const anchor = document.querySelector<HTMLElement>('[data-logo-anchor]');
+  const endAnchor = document.querySelector<HTMLElement>('[data-logo-end]');
   if (!hero || !anchor) return () => {};
 
   const root = document.documentElement;
@@ -195,6 +212,7 @@ export function initLine() {
     const radius = isDesktop ? 28 : 14;
 
     const letters = transformLetters(logo.letters, docRect(anchor));
+    const ending = endAnchor ? transformLetters(logo.letters, docRect(endAnchor)) : null;
     const sections = [...document.querySelectorAll<HTMLElement>('main > section')];
     const heroRect = docRect(hero);
     const pts: Point[] = [letters.exit, { x: laneR, y: letters.exit.y }];
@@ -232,6 +250,13 @@ export function initLine() {
         });
       }
 
+      if (isLast && ending) {
+        const entry = ending.exit;
+        const jogY = entry.y - Math.min(96, (entry.y - last().y) / 2);
+        pts.push({ x: last().x, y: jogY }, { x: laneR, y: jogY }, { x: laneR, y: entry.y }, entry);
+        return;
+      }
+
       if (isLast) {
         const footer = section.querySelector('footer');
         const endY = footer ? docRect(footer).top - 48 : rect.bottom - pad;
@@ -254,8 +279,17 @@ export function initLine() {
     probeSvg.remove();
 
     const tail = buildTail(pts, radius, lettersLength);
-    segments = tail.segments;
     const { samplesLength, samplesY } = sampleTail(tail.segments, lettersLength);
+    segments = [...tail.segments];
+    let total = tail.end;
+    if (ending) {
+      for (const s of parseSegments(ending.d).reverse()) {
+        const seg = { a: s.b, c: s.c, b: s.a };
+        const l = segmentLength(seg);
+        segments.push({ ...seg, length: l, start: total });
+        total += l;
+      }
+    }
 
     const previous = geo?.nodes ?? [];
     layer.replaceChildren();
@@ -269,7 +303,7 @@ export function initLine() {
       const tone = toneOf(section);
       const top = r.top;
       const bottom = r.top + r.height;
-      const inside = tail.segments.filter((s) => Math.max(s.a.y, s.b.y, s.c?.y ?? -Infinity) >= top - 4 && Math.min(s.a.y, s.b.y, s.c?.y ?? Infinity) <= bottom + 4);
+      const inside = segments.filter((s) => Math.max(s.a.y, s.b.y, s.c?.y ?? -Infinity) >= top - 4 && Math.min(s.a.y, s.b.y, s.c?.y ?? Infinity) <= bottom + 4);
       const isHero = section === hero;
       if (!inside.length && !isHero) return;
       const svg = document.createElementNS(NS, 'svg');
@@ -328,13 +362,14 @@ export function initLine() {
     });
 
     return {
-      total: tail.end,
+      total,
       lettersLength,
       stub: Math.max(10, 9 * letters.scale),
       samplesLength,
       samplesY,
       nodes,
       heroHeight: heroRect.height,
+      finale: ending ? { y: ending.exit.y, length: total - tail.end } : null,
     };
   };
 
@@ -355,7 +390,11 @@ export function initLine() {
     const rest = g.lettersLength + g.stub;
     const mapped = Math.max(rest, mappedHead(g, scrollY + innerHeight * HEAD_AT));
     const blend = gsap.utils.clamp(0, 1, scrollY / TOP_ZONE);
-    return rest + (mapped - rest) * blend;
+    const head = rest + (mapped - rest) * blend;
+    if (!g.finale) return head;
+    const from = Math.min(g.finale.y - innerHeight * HEAD_AT, maxScroll - innerHeight * 0.3);
+    const progress = gsap.utils.clamp(0, 1, (scrollY - from) / (maxScroll - from));
+    return Math.min(g.total, head + g.finale.length * progress);
   };
 
   const startForScroll = (g: Geometry) => g.lettersLength * gsap.utils.clamp(0, 1, scrollY / (g.heroHeight * 0.55));
